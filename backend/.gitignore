@@ -1,0 +1,64 @@
+# ==============================
+# OS / Editor / IDE artifacts
+# ==============================
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*.iml
+
+# ==============================
+# Go build outputs
+# ==============================
+# Common binary/output directories
+bin/
+dist/
+build/
+tmp/
+out/
+
+# Binary/object files
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# ==============================
+# Coverage / profiling
+# ==============================
+coverage/
+cover/
+*.coverprofile
+coverage.out
+profile.cov
+**/coverage-*.out
+
+# ==============================
+# Logs / PIDs
+# ==============================
+*.log
+logs/
+*.pid
+
+# ==============================
+# Environment / local config
+# ==============================
+.env
+.env.*
+.envrc
+.direnv/
+
+# ==============================
+# Docker / Compose (local-only overrides)
+# ==============================
+.docker/
+docker-compose.override.yml
+
+# ==============================
+# Node (future tooling)
+# ==============================
+node_modules/
