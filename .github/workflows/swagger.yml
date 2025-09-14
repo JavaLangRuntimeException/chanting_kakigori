@@ -1,0 +1,30 @@
+name: swagger
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'backend/api/swagger/**'
+      - 'backend/services/gateway/**'
+      - '.github/workflows/swagger.yml'
+
+jobs:
+  swagger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - name: Install oapi-codegen
+        run: |
+          GOBIN=$(go env GOPATH)/bin go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1
+
+      - name: Check swagger generation up-to-date
+        working-directory: backend
+        run: |
+          make swagger-check
