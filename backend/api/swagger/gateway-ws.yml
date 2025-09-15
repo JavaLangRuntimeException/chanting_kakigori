@@ -1,0 +1,49 @@
+openapi: 3.0.3
+info:
+  title: ChantingKakigori Gateway WS API
+  version: 0.1.0
+servers:
+  - url: /
+paths:
+  /ws:
+    get:
+      summary: WebSocket endpoint for room-based audio value aggregation
+      description: |
+        WebSocket 接続先: `ws://<host>/ws?room=<ROOM_ID>`（本番は `wss://` の予定）。
+
+        送信メッセージ例（クライアント → サーバ）:
+        ```json
+        { "value": 0.7 }
+        ```
+
+        受信メッセージ例（サーバ → クライアント）:
+        ```json
+        { "average": 0.733, "count": 3 }
+        ```
+
+        - `value` は 0 以外の数値を送って欲しいです...0の場合は/wsに値の送信はしないで欲しいです
+        - `average` は同一 room の直近 5 秒間に送られたサンプルの単純平均
+        - `count` は同一 room の直近 5 秒間のサンプル総数
+      parameters:
+        - in: query
+          name: room
+          required: true
+          schema:
+            type: string
+      responses:
+        '101': { description: Switching Protocols }
+  /healthz:
+    get:
+      summary: Liveness probe endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+
+
+
