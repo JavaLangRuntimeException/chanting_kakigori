@@ -1,0 +1,36 @@
+name: proto-check
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'backend/proto/**'
+      - '.github/workflows/proto.yml'
+
+jobs:
+  proto:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install buf
+        run: |
+          sudo bash -lc "curl -sSL https://github.com/bufbuild/buf/releases/download/v1.47.2/buf-Linux-x86_64 -o /usr/local/bin/buf && chmod +x /usr/local/bin/buf"
+      - name: Lint protos
+        working-directory: backend/proto
+        run: buf lint
+
+      - name: Generate protobufs
+        working-directory: backend/proto
+        run: |
+          buf generate
+      - name: Fail if generated code has diffs
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          if ! git diff --quiet; then
+            echo "Generated code is not up-to-date. Please run 'make -C backend proto' and commit changes." >&2
+            echo "Changed files:" >&2
+            git diff --name-only >&2
+            exit 1
+          fi

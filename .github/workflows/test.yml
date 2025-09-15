@@ -1,0 +1,48 @@
+name: test
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/test.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GOTOOLCHAIN: local
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Install buf
+        run: |
+          sudo bash -lc "curl -sSL https://github.com/bufbuild/buf/releases/download/v1.47.2/buf-Linux-x86_64 -o /usr/local/bin/buf && chmod +x /usr/local/bin/buf"
+
+      - name: Proto lint & generate
+        working-directory: backend
+        run: |
+          make proto
+
+      - name: Run unit tests (workspace)
+        working-directory: backend
+        run: |
+          go work sync || true
+          go test ./...
+
