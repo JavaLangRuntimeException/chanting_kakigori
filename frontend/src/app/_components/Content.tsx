@@ -3,7 +3,26 @@
 
 "use client";
 
+import { useEffect, useState } from "react";
+import type { MenuItem } from "@/api/@types";
+import { mockMenuData } from "@/app/_mocks/menuData";
+
 export function Content() {
+	const [scheduleItems, setScheduleItems] = useState<MenuItem[]>([]);
+
+	useEffect(() => {
+		const fetchMenu = async () => {
+			// TODO: 実際のAPI呼び出しに置き換える
+			// const apiClient = aspida(axios.create({ baseURL: "http://localhost:8080" }));
+			// const response = await apiClient.api.v1.stores.menu.$get();
+			// setScheduleItems(response.menu || []);
+
+			// モックデータを使用
+			setScheduleItems(mockMenuData.menu || []);
+		};
+
+		fetchMenu();
+	}, []);
 	return (
 		<div className="min-h-screen bg-gray-50">
 			<header className="bg-white border-b border-gray-200">
@@ -73,7 +92,7 @@ export function Content() {
 						</h2>
 
 						<div className="grid md:grid-cols-2 gap-8 mb-8">
-							<div className="prose prose-gray max-w-none">
+							<div className="prose prose-gray max-w-none order-2 md:order-1">
 								<h2 className="text-2xl font-bold text-gray-900 mb-4">
 									技育祭2025【秋】連動特別企画
 									『かき氷注文システムのUIを最凶にせよ!?』
@@ -317,7 +336,7 @@ export function Content() {
 									</div>
 								</div>
 							</div>
-							<div>
+							<div className="order-1 md:order-2">
 								<div className="flex items-center justify-between mb-4">
 									<h4 className="font-semibold text-gray-900">開催日程</h4>
 									<button
@@ -338,102 +357,29 @@ export function Content() {
 									</button>
 								</div>
 								<div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100">
-									<div className="p-4 flex items-center justify-between">
-										<div className="flex items-center gap-6">
-											<div>
-												<p className="text-sm font-medium text-gray-900">
-													9月24日
-												</p>
-												<p className="text-sm">(水曜日)</p>
-											</div>
-											<div>
-												<p className="text-sm font-medium text-gray-900">
-													19:00〜20:00
-												</p>
-												<p className="text-xs text-gray-500">
-													オンライン 締切9月23日(火) 18:00
-												</p>
-											</div>
-										</div>
-										<button
-											type="button"
-											className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-800 transition-colors"
+									{scheduleItems.map((item) => (
+										<div
+											key={item.id}
+											className="p-4 flex items-center justify-between"
 										>
-											申込へ
-										</button>
-									</div>
-									<div className="p-4 flex items-center justify-between">
-										<div className="flex items-center gap-6">
-											<div>
-												<p className="text-sm font-medium text-gray-900">
-													10月22日
-												</p>
-												<p className="text-sm">(水曜日)</p>
+											<div className="flex items-center gap-6">
+												<div>
+													<p className="text-sm font-medium text-gray-900">
+														{item.name}
+													</p>
+													<p className="text-xs text-gray-500">
+														{item.description}
+													</p>
+												</div>
 											</div>
-											<div>
-												<p className="text-sm font-medium text-gray-900">
-													19:00〜20:00
-												</p>
-												<p className="text-xs text-gray-500">
-													オンライン 締切10月21日(火) 18:00
-												</p>
-											</div>
+											<button
+												type="button"
+												className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-800 transition-colors"
+											>
+												申込へ
+											</button>
 										</div>
-										<button
-											type="button"
-											className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-800 transition-colors"
-										>
-											申込へ
-										</button>
-									</div>
-									<div className="p-4 flex items-center justify-between">
-										<div className="flex items-center gap-6">
-											<div>
-												<p className="text-sm font-medium text-gray-900">
-													11月19日
-												</p>
-												<p className="text-sm">(水曜日)</p>
-											</div>
-											<div>
-												<p className="text-sm font-medium text-gray-900">
-													19:00〜20:00
-												</p>
-												<p className="text-xs text-gray-500">
-													オンライン 締切11月18日(火) 18:00
-												</p>
-											</div>
-										</div>
-										<button
-											type="button"
-											className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-800 transition-colors"
-										>
-											申込へ
-										</button>
-									</div>
-									<div className="p-4 flex items-center justify-between">
-										<div className="flex items-center gap-6">
-											<div>
-												<p className="text-sm font-medium text-gray-900">
-													12月17日
-												</p>
-												<p className="text-sm">(水曜日)</p>
-											</div>
-											<div>
-												<p className="text-sm font-medium text-gray-900">
-													19:00〜20:00
-												</p>
-												<p className="text-xs text-gray-500">
-													オンライン 締切12月16日(火) 18:00
-												</p>
-											</div>
-										</div>
-										<button
-											type="button"
-											className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-800 transition-colors"
-										>
-											申込へ
-										</button>
-									</div>
+									))}
 								</div>
 							</div>
 						</div>
