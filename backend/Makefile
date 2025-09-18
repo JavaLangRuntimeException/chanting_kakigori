@@ -10,6 +10,10 @@ test:
 	@echo "Running tests..."
 	@go test ./...
 
+lint:
+	@echo "Linting services..."
+	@golangci-lint run --timeout=5m ./services/... ./pkg/... ./gen/...
+
 proto-lint:
 	@echo "Linting protos with buf..."
 	@cd proto && buf lint
@@ -36,7 +40,7 @@ swagger-gen:
 	@echo "Generating OpenAPI types with oapi-codegen for all api/swagger/*.yml..."
 	@set -e; for f in $$(ls api/swagger/*.yml 2>/dev/null || true); do \
 		name=$$(basename $$f .yml); \
-		outdir=services/$$name/internal; \
+		outdir=services/$$name/internal/swagger; \
 		outfile=$$outdir/$$name.gen.go; \
 		echo "  - $$f -> $$outfile"; \
 		mkdir -p $$outdir; \
@@ -48,7 +52,7 @@ swagger-check:
 	@status=0; \
 	for f in $$(ls api/swagger/*.yml 2>/dev/null || true); do \
 		name=$$(basename $$f .yml); \
-		outdir=services/$$name/internal; \
+		outdir=services/$$name/internal/swagger; \
 		target=$$outdir/$$name.gen.go; \
 		tmpfile=$$(mktemp); \
 		mkdir -p $$outdir; \

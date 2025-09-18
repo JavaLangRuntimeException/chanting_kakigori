@@ -83,6 +83,6 @@ jobs:
         run: |
           go work sync || true
       - name: Lint ${{ matrix.service }} service
-        working-directory: backend/services/${{ matrix.service }}
+        working-directory: backend
         run: |
-          golangci-lint run --timeout=5m ./internal/... ./cmd/...
+          golangci-lint run --timeout=5m --skip-dirs '(?i)internal/swagger|^gen($|/)' ./services/${{ matrix.service }}/...
