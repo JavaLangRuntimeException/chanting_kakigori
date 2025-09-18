@@ -6,7 +6,8 @@
 		"dev": "next dev -p 3000 --turbopack",
 		"build": "next build --turbopack",
 		"type-check": "tsc --noEmit",
-		"check": "biome check . --fix"
+		"check": "biome check . --fix",
+		"gen-aspida": "openapi2aspida"
 	},
 	"dependencies": {
 		"class-variance-authority": "^0.7.1",
@@ -18,11 +19,14 @@
 		"tailwind-merge": "^3.3.1"
 	},
 	"devDependencies": {
+		"@aspida/axios": "^1.14.0",
 		"@biomejs/biome": "2.2.4",
 		"@tailwindcss/postcss": "^4",
 		"@types/node": "^20",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
+		"aspida": "^1.14.0",
+		"openapi2aspida": "^0.24.0",
 		"tailwindcss": "^4",
 		"tw-animate-css": "^1.3.8",
 		"typescript": "^5"
