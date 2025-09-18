@@ -93,10 +93,6 @@ export function Content() {
 
 						<div className="grid md:grid-cols-2 gap-8 mb-8">
 							<div className="prose prose-gray max-w-none order-2 md:order-1">
-								<h2 className="text-2xl font-bold text-gray-900 mb-4">
-									技育祭2025【秋】連動特別企画
-									『かき氷注文システムのUIを最凶にせよ!?』
-								</h2>
 								<p className="text-black leading-relaxed mb-4">
 									2025年10月11日（土）～12日（日）の2日間で開催する、エンジニアを目指す学生のための学園祭！技育祭2025【秋】
 									<br />
