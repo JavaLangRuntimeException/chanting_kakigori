@@ -1,5 +1,14 @@
 version: "3.9"
 services:
+  gateway-api:
+    build:
+      context: .
+      dockerfile: services/gateway-api/Dockerfile
+    image: local/gateway-api:dev
+    environment:
+      - PORT=8080
+    ports:
+      - "8081:8080"
   kakigori-ws:
     build:
       context: .
