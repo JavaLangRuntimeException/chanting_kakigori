@@ -1,0 +1,11 @@
+pre-push:
+  parallel: true
+  jobs:
+    - name: Frontend TypeCheck
+      run: cd frontend && pnpm run type-check
+
+pre-commit:
+  jobs:
+    - name: Frontend Biome checks
+      run: cd frontend && pnpm run check
+      stage_fixed: true
