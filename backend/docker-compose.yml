@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  kakigori-ws:
+    build:
+      context: .
+      dockerfile: services/kakigori-ws/Dockerfile
+    image: local/kakigori-ws:dev
+    environment:
+      - PORT=50051
+    ports:
+      - "50051:50051"
+  gateway-ws:
+    build:
+      context: .
+      dockerfile: services/gateway-ws/Dockerfile
+    image: local/gateway-ws:dev
+    environment:
+      - PORT=8080
+      - KAKIGORI_GRPC_ADDR=kakigori-ws:50051
+    depends_on:
+      - kakigori-ws
+  edge:
+    image: nginx:1.27-alpine
+    ports:
+      - "8080:80"
+    depends_on:
+      - gateway-ws
+    volumes:
+      - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+
+
+

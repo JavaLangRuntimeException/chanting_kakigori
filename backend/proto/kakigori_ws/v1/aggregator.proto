@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package kakigori_ws.v1;
+
+option go_package = "chantingkakigori/gen/go/kakigori_ws/v1;kakigoriwsv1";
+
+message AggregateRequest {
+  string room = 1;
+  double value = 2;
+}
+
+message AggregateResponse {
+  string room = 1;
+  double average = 2;
+  int32 count = 3;
+}
+
+service KakigoriWsAggregatorService {
+  rpc Aggregate(stream AggregateRequest) returns (stream AggregateResponse);
+}
