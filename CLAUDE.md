@@ -40,7 +40,7 @@ pnpm run type-check
 pnpm run check
 
 # OpenAPIからAPI型定義を生成（Aspida使用）
-pnpm gen-api
+pnpm gen-aspida
 ```
 
 ### バックエンド開発
