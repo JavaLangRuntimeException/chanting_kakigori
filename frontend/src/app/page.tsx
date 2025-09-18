@@ -1,5 +1,5 @@
-import { Content } from "@/app/_components/Content";
+import { PageWrapper } from "@/app/_components/PageWrapper";
 
 export default function Page() {
-	return <Content />;
+	return <PageWrapper />;
 }
