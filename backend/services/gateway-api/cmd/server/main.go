@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	upstreamBaseURL = "https://kakigori-api.fly.dev"
-	storeID         = "HKWZRTNL"
+	baseURL = "https://kakigori-api.fly.dev"
+	storeID = "HKWZRTNL"
 )
 
 func main() {
@@ -24,21 +24,27 @@ func main() {
 	}
 
 	// DI(Usecase)
-	menuUsecase := usecase.NewMenuUsecase(upstreamBaseURL)
+	menuUsecase := usecase.NewMenuUsecase(baseURL)
+	orderUsecase := usecase.NewOrderUsecase(baseURL)
 
 	// DI(Handler)
 	menuHandler := handler.NewMenuHandler(menuUsecase)
+	orderHandler := handler.NewOrderHandler(orderUsecase)
 
 	// Routing
 	e := echo.New()
-	e.GET("/api/healthz", func(c echo.Context) error {
+	e.GET("/v1/healthz", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"status": "ok"})
 	})
 	e.GET("/swagger.yaml", func(c echo.Context) error {
-		return c.File("/api/swagger/gateway-api.yml")
+		return c.File("/v1/swagger/gateway-api.yml")
 	})
-	e.GET("/api/v1/stores/menu", func(c echo.Context) error {
+	e.GET("/v1/stores/menu", func(c echo.Context) error {
 		menuHandler.GetMenu(c.Response().Writer, c.Request(), storeID)
+		return nil
+	})
+	e.POST("/v1/stores/orders", func(c echo.Context) error {
+		orderHandler.PostOrders(c.Response().Writer, c.Request(), storeID)
 		return nil
 	})
 
