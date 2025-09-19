@@ -23,11 +23,11 @@ func TestGetMenu_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(items) != 1 {
-		t.Fatalf("expected 1 item, got %d", len(items))
+	if len(*items) != 1 {
+		t.Fatalf("expected 1 item, got %d", len(*items))
 	}
-	if items[0].Id == nil || *items[0].Id != "giiku-sai" {
-		t.Fatalf("unexpected id: %#v", items[0].Id)
+	if (*items)[0].Id == nil || *(*items)[0].Id != "giiku-sai" {
+		t.Fatalf("unexpected id: %#v", (*items)[0].Id)
 	}
 }
 

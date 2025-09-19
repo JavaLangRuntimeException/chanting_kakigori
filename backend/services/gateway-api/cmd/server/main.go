@@ -47,6 +47,10 @@ func main() {
 		orderHandler.PostOrders(c.Response().Writer, c.Request(), storeID)
 		return nil
 	})
+	e.GET("/v1/stores/orders/:order_id", func(c echo.Context) error {
+		orderHandler.GetOrderByID(c.Response().Writer, c.Request(), storeID, c.Param("order_id"))
+		return nil
+	})
 
 	srv := &http.Server{
 		Addr:              ":" + httpPort,

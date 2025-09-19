@@ -10,22 +10,22 @@ import (
 	openapi "chantingkakigori/services/gateway-api/internal/swagger"
 )
 
-type fakeFetcher struct {
+type fakeMenuFetcher struct {
 	items []openapi.MenuItem
 	err   error
 }
 
-func (f fakeFetcher) FetchMenu(_ context.Context, _ string) ([]openapi.MenuItem, error) {
-	return f.items, f.err
+func (f fakeMenuFetcher) FetchMenu(_ context.Context, _ string) (*[]openapi.MenuItem, error) {
+	return &f.items, f.err
 }
 
 func TestMenuHandler_BadRequestWhenNoStoreID(t *testing.T) {
 	t.Setenv("STORE_ID", "")
-	h := NewMenuHandler(fakeFetcher{})
+	h := NewMenuHandler(fakeMenuFetcher{items: []openapi.MenuItem{}, err: nil})
 
 	req := httptest.NewRequest(http.MethodGet, "/v1/stores/menu", nil)
 	rec := httptest.NewRecorder()
-	h.ServeHTTP(rec, req)
+	h.GetMenu(rec, req, "")
 
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("expected 400, got %d", rec.Code)
@@ -37,7 +37,7 @@ func TestMenuHandler_Success(t *testing.T) {
 	name := "x"
 	desc := "y"
 	items := []openapi.MenuItem{{Id: &id, Name: &name, Description: &desc}}
-	h := NewMenuHandler(fakeFetcher{items: items})
+	h := NewMenuHandler(fakeMenuFetcher{items: items})
 
 	req := httptest.NewRequest(http.MethodGet, "/v1/stores/menu", nil)
 	rec := httptest.NewRecorder()

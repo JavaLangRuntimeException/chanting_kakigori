@@ -31,12 +31,11 @@ func NewMenuUsecase(baseURL string) *MenuClient {
 
 // MenuFetcher is the interface used by handlers to fetch menu items.
 type MenuFetcher interface {
-	FetchMenu(ctx context.Context, storeID string) ([]openapi.MenuItem, error)
+	FetchMenu(ctx context.Context, storeID string) (*[]openapi.MenuItem, error)
 }
 
-// FetchMenu retrieves menu items for the given storeID from upstream and converts them
-// into the swagger-generated types.
-func (u *MenuClient) FetchMenu(ctx context.Context, storeID string) ([]openapi.MenuItem, error) {
+// FetchMenu retrieves menu items for the given storeID from upstream and converts them into the swagger-generated types.
+func (u *MenuClient) FetchMenu(ctx context.Context, storeID string) (*[]openapi.MenuItem, error) {
 	base, err := url.Parse(u.BaseURL)
 	if err != nil {
 		return nil, fmt.Errorf("invalid base url: %w", err)
@@ -84,5 +83,5 @@ func (u *MenuClient) FetchMenu(ctx context.Context, storeID string) ([]openapi.M
 			Description: &desc,
 		})
 	}
-	return items, nil
+	return &items, nil
 }
