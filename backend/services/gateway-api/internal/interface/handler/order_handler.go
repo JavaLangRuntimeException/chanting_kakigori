@@ -51,5 +51,39 @@ func (h *OrderHandler) PostOrders(w http.ResponseWriter, r *http.Request, storeI
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	_ = json.NewEncoder(w).Encode(&order)
+}
+
+func (h *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request, storeID string, orderID string) {
+	ctx := r.Context()
+	if _, hasDeadline := ctx.Deadline(); !hasDeadline {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
+		defer cancel()
+	}
+
+	order, err := h.Usecase.GetOrderByID(ctx, storeID, orderID)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadGateway)
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"error":   "Bad Gateway",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if order == nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"error":   "Not Found",
+			"message": "order not found",
+		})
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(order)
 }

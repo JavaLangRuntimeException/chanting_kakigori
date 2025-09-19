@@ -53,3 +53,31 @@ func TestPostOrder_UpstreamError(t *testing.T) {
 		t.Fatalf("expected error, got nil")
 	}
 }
+
+func TestGetOrderByID_Success(t *testing.T) {
+	uc := &OrderClient{BaseURL: "https://example", Client: &testhttpclient.Client{RT: testhttpclient.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
+		if r.URL.Path != "/v1/stores/HKWZRTNL/orders/o-1" {
+			t.Fatalf("unexpected path: %s", r.URL.Path)
+		}
+		body := `{"id":"o-1","menu_item_id":"giiku-sai","menu_name":"x","order_number":1,"status":"pending"}`
+		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(body)), Header: make(http.Header)}, nil
+	})}}
+
+	order, err := uc.GetOrderByID(context.Background(), "HKWZRTNL", "o-1")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if order.Id == nil || *order.Id != "o-1" {
+		t.Fatalf("unexpected id: %#v", order.Id)
+	}
+}
+
+func TestGetOrderByID_UpstreamError(t *testing.T) {
+	uc := &OrderClient{BaseURL: "https://example", Client: &testhttpclient.Client{RT: testhttpclient.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
+		return &http.Response{StatusCode: 500, Body: io.NopCloser(strings.NewReader("oops")), Header: make(http.Header)}, nil
+	})}}
+	_, err := uc.GetOrderByID(context.Background(), "HKWZRTNL", "o-1")
+	if err == nil {
+		t.Fatalf("expected error, got nil")
+	}
+}
