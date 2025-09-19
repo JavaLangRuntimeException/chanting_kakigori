@@ -3,30 +3,25 @@ package usecase
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"time"
 
+	httpclient "chantingkakigori/pkg/httpclient"
 	openapi "chantingkakigori/services/gateway-api/internal/swagger"
 )
 
-// HTTPClient represents the subset of http.Client we rely on, for easier testing.
-type HTTPClient interface {
-	Do(req *http.Request) (*http.Response, error)
-}
-
 // MenuUsecase fetches store menus from the upstream API.
-type MenuUsecase struct {
+type MenuClient struct {
 	BaseURL string
-	Client  HTTPClient
+	Client  httpclient.HTTPClient
 }
 
 // NewMenuUsecase creates a new MenuUsecase with sane defaults.
-func NewMenuUsecase(baseURL string) *MenuUsecase {
-	return &MenuUsecase{
+func NewMenuUsecase(baseURL string) *MenuClient {
+	return &MenuClient{
 		BaseURL: baseURL,
 		Client: &http.Client{
 			Timeout: 10 * time.Second,
@@ -41,11 +36,7 @@ type MenuFetcher interface {
 
 // FetchMenu retrieves menu items for the given storeID from upstream and converts them
 // into the swagger-generated types.
-func (u *MenuUsecase) FetchMenu(ctx context.Context, storeID string) ([]openapi.MenuItem, error) {
-	if storeID == "" {
-		return nil, errors.New("storeID is required")
-	}
-
+func (u *MenuClient) FetchMenu(ctx context.Context, storeID string) ([]openapi.MenuItem, error) {
 	base, err := url.Parse(u.BaseURL)
 	if err != nil {
 		return nil, fmt.Errorf("invalid base url: %w", err)

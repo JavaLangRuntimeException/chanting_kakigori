@@ -6,20 +6,12 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+
+	testhttpclient "chantingkakigori/pkg/testhttpclient"
 )
 
-type roundTripperFunc func(*http.Request) (*http.Response, error)
-
-func (f roundTripperFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
-type httpClient struct{ rt http.RoundTripper }
-
-func (c *httpClient) Do(req *http.Request) (*http.Response, error) {
-	return c.rt.RoundTrip(req)
-}
-
-func TestFetchMenu_Success(t *testing.T) {
-	uc := &MenuUsecase{BaseURL: "https://example", Client: &httpClient{rt: roundTripperFunc(func(r *http.Request) (*http.Response, error) {
+func TestGetMenu_Success(t *testing.T) {
+	uc := &MenuClient{BaseURL: "https://example", Client: &testhttpclient.Client{RT: testhttpclient.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.URL.Path != "/v1/stores/HKWZRTNL/menu" {
 			t.Fatalf("unexpected path: %s", r.URL.Path)
 		}
@@ -39,8 +31,8 @@ func TestFetchMenu_Success(t *testing.T) {
 	}
 }
 
-func TestFetchMenu_UpstreamError(t *testing.T) {
-	uc := &MenuUsecase{BaseURL: "https://example", Client: &httpClient{rt: roundTripperFunc(func(r *http.Request) (*http.Response, error) {
+func TestGetMenu_UpstreamError(t *testing.T) {
+	uc := &MenuClient{BaseURL: "https://example", Client: &testhttpclient.Client{RT: testhttpclient.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		return &http.Response{StatusCode: 500, Body: io.NopCloser(strings.NewReader("oops")), Header: make(http.Header)}, nil
 	})}}
 
