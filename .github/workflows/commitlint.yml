@@ -1,0 +1,85 @@
+name: commitlint
+
+on:
+  pull_request: # PR作成/更新時のみ実行（fork対策やpush全体は対象外）
+    types: [opened, synchronize]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/commitlint.yml'
+
+jobs:
+  commitlint:
+    runs-on: ubuntu-22.04
+    if: github.event.pull_request.user.login != 'dependabot[bot]' # bot由来のPRは除外
+    permissions:
+      contents: read
+      pull-requests: write # PRにコメント投稿するために必要
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4 # fetch-depth: 0で全コミット取得
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4 # Node準備（npxでcommitlint実行）
+        with:
+          node-version: '18'
+
+      # lockfile が無くても動作するよう、npxで @commitlint/cli を都度実行する
+      - name: Validate commits and prepare PR comment # PR差分の各コミットをチェックし、違反一覧のコメント本文を組み立てる
+        id: commitlint_check
+        shell: bash
+        run: |
+          BASE_SHA=${{ github.event.pull_request.base.sha }}
+          HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          REPO_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
+
+          has_violations=false
+          COMMENT=$'[commitlint CI]コミットメッセージが規則と違うコミットがあります。\n以下のようにコミットメッセージを修正してください。\n\n'
+          COMMENT+=$'**コミットメッセージの形式**\n'
+          COMMENT+=$'  type(scope): subject\n'
+          COMMENT+=$'  - **type**: feat | fix | refactor | docs | style | perf | revert | ci | build | chore | test\n'
+          COMMENT+=$'  - **scope**: 任意（モジュール名など）、不要なら省略可\n'
+          COMMENT+=$'  - **subject**: 簡潔に要点のみ（文末に句点を付けない）、最大100文字\n'
+          COMMENT+=$'\n(例)\n'
+          COMMENT+=$'feat: add user login with email link\n'
+          COMMENT+=$'fix(microservice): return 404 when resource is not found\n\n'
+          COMMENT+=$'以下のコミットを修正してください。\n\n'
+
+          for sha in $(git rev-list "${BASE_SHA}..${HEAD_SHA}" --no-merges --reverse); do
+            message=$(git log -1 --format=%B "$sha")
+            # 1コミットずつ lint。失敗しても続行し、一覧を作る
+            if ! echo "$message" | npx --yes @commitlint/cli@19 --config .commitlintrc.json --color > /dev/null 2>&1; then
+              has_violations=true
+              subject=$(printf "%s" "$message" | head -n1)
+              short=${sha:0:7}
+              COMMENT+="- [${short}](${REPO_URL}/commit/$sha): ${subject}"
+              COMMENT+=$'\n'
+            fi
+          done
+
+          echo "has_violations=${has_violations}" >> "$GITHUB_OUTPUT"
+          {
+            echo "comment_body<<EOF"
+            printf "%s\n" "$COMMENT"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Comment violations on PR # 違反がある場合のみ、PRにコメントを投稿
+        if: steps.commitlint_check.outputs.has_violations == 'true'
+        uses: actions/github-script@v7
+        env:
+          COMMENT_BODY: ${{ steps.commitlint_check.outputs.comment_body }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const body = process.env.COMMENT_BODY;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+      - name: Fail when violations exist # コメント投稿後に失敗させてPRのチェックを落とす
+        if: steps.commitlint_check.outputs.has_violations == 'true'
+        run: exit 1
