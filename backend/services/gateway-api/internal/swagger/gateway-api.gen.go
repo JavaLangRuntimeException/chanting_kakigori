@@ -35,6 +35,21 @@ type OrderResponse struct {
 // OrderResponseStatus defines model for OrderResponse.Status.
 type OrderResponseStatus string
 
+// SimilarityRequest defines model for SimilarityRequest.
+type SimilarityRequest struct {
+	// AudioBase64 Base64-encoded audio data (required MP3 file)
+	AudioBase64 string `json:"audio_base64"`
+
+	// Text Text to compare against transcribed audio(文字起こし正解のテキスト)
+	Text string `json:"text"`
+}
+
+// SimilarityResponse defines model for SimilarityResponse.
+type SimilarityResponse struct {
+	// Similarity Similarity score between 0 and 1 (1: perfect match, 0: no match)
+	Similarity *float32 `json:"similarity,omitempty"`
+}
+
 // PostApiV1StoresOrdersJSONBody defines parameters for PostApiV1StoresOrders.
 type PostApiV1StoresOrdersJSONBody struct {
 	MenuItemId *string `json:"menu_item_id,omitempty"`
@@ -42,3 +57,6 @@ type PostApiV1StoresOrdersJSONBody struct {
 
 // PostApiV1StoresOrdersJSONRequestBody defines body for PostApiV1StoresOrders for application/json ContentType.
 type PostApiV1StoresOrdersJSONRequestBody PostApiV1StoresOrdersJSONBody
+
+// PostApiV1TranscriptJSONRequestBody defines body for PostApiV1Transcript for application/json ContentType.
+type PostApiV1TranscriptJSONRequestBody = SimilarityRequest
