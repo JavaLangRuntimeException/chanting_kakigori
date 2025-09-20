@@ -6,11 +6,41 @@ info:
 servers:
   - url: http://localhost:8080
 paths:
+  /api/v1/transcript:
+    post:
+      summary: Compute similarity between provided text and speech in audio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SimilarityRequest"
+            example:
+              audio_base64: UklGRiQAAABXQVZFZm10IBIAAAABAAEAESsAACJWAAACABAAZGF0YQAAAA==
+              text: こんにちは
+      responses:
+        "200":
+          description: Similarity score
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimilarityResponse"
+              example:
+                similarity: 0.87
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Bad Request
+                message: Invalid request body
   /api/v1/stores/menu:
     get:
       summary: Get menu for a store
       responses:
-        '200':
+        "200":
           description: Menu list
           content:
             application/json:
@@ -20,7 +50,7 @@ paths:
                   menu:
                     type: array
                     items:
-                      $ref: '#/components/schemas/MenuItem'
+                      $ref: "#/components/schemas/MenuItem"
               example:
                 menu:
                   - id: giiku-sai
@@ -44,24 +74,24 @@ paths:
             example:
               menu_item_id: giiku-sai
       responses:
-        '201':
+        "201":
           description: Order created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrderResponse'
+                $ref: "#/components/schemas/OrderResponse"
               example:
                 id: store-001-1
                 menu_item_id: giiku-sai
                 menu_name: 技育祭な いちご味
                 status: pending
                 order_number: 1
-        '400':
+        "400":
           description: Invalid input or menu_item_id not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
                 invalidBody:
                   summary: Invalid request body
@@ -84,28 +114,45 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Order found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrderResponse'
+                $ref: "#/components/schemas/OrderResponse"
               example:
                 id: store-001-1
                 menu_item_id: giiku-sai
                 menu_name: 技育祭な いちご味
                 order_number: 1
-        '400':
+        "400":
           description: Invalid order ID format
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
                 error: Bad Request
                 message: Invalid order ID format
 components:
   schemas:
+    SimilarityRequest:
+      type: object
+      required: [audio_base64, text]
+      properties:
+        audio_base64:
+          type: string
+          description: Base64-encoded audio data (required MP3 file)
+        text:
+          type: string
+          description: Text to compare against transcribed audio(文字起こし正解のテキスト)
+    SimilarityResponse:
+      type: object
+      properties:
+        similarity:
+          type: number
+          format: float
+          description: "Similarity score between 0 and 1 (1: perfect match, 0: no match)"
     MenuItem:
       type: object
       properties:
