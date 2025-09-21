@@ -1,0 +1,50 @@
+openapi: 3.0.3
+info:
+  title: ChantingKakigori Gateway Waiting WS API
+  version: 0.1.0
+servers:
+  - url: /
+paths:
+  /ws/stay:
+    get:
+      summary: WebSocket endpoint for waiting room state broadcast
+      description: |
+        WebSocket 接続先: `ws://<host>/ws/stay?room=<ROOM_ID>`。
+
+        同じ room の接続数に応じて以下のmessageを全員にブロードキャストします。
+
+        1 クライアント接続中:
+        ```json
+        { "stay_num": "1", "start_time": "null" }
+        ```
+
+        2 クライアント接続中:
+        ```json
+        { "stay_num": "2", "start_time": "null" }
+        ```
+
+        3 クライアント接続時は 10 秒後に:
+        ```json
+        { "stay_num": "3", "start_time": "2017-07-21T17:32:28Z" }
+        ```
+        をブロードキャストし、その後はサーバ側で切断します。
+      parameters:
+        - in: query
+          name: room
+          required: true
+          schema:
+            type: string
+      responses:
+        "101": { description: Switching Protocols }
+  /ws/health:
+    get:
+      summary: Liveness probe endpoint
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
