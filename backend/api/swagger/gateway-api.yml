@@ -10,7 +10,7 @@ paths:
     get:
       summary: Get menu for a store
       responses:
-        '200':
+        "200":
           description: Menu list
           content:
             application/json:
@@ -20,7 +20,7 @@ paths:
                   menu:
                     type: array
                     items:
-                      $ref: '#/components/schemas/MenuItem'
+                      $ref: "#/components/schemas/MenuItem"
               example:
                 menu:
                   - id: giiku-sai
@@ -44,24 +44,24 @@ paths:
             example:
               menu_item_id: giiku-sai
       responses:
-        '201':
+        "201":
           description: Order created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrderResponse'
+                $ref: "#/components/schemas/OrderResponse"
               example:
                 id: store-001-1
                 menu_item_id: giiku-sai
                 menu_name: 技育祭な いちご味
                 status: pending
                 order_number: 1
-        '400':
+        "400":
           description: Invalid input or menu_item_id not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
                 invalidBody:
                   summary: Invalid request body
@@ -84,23 +84,24 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Order found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrderResponse'
+                $ref: "#/components/schemas/OrderResponse"
               example:
                 id: store-001-1
                 menu_item_id: giiku-sai
                 menu_name: 技育祭な いちご味
                 order_number: 1
-        '400':
+                status: pending
+        "400":
           description: Invalid order ID format
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
                 error: Bad Request
                 message: Invalid order ID format
