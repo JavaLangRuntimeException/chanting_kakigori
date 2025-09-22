@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useVolumeDetector } from "@/hooks/useVolumeDetector";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { apiClient } from "@/lib/apiClient";
 import {
 	chantingStateAtom,
 	currentStepAtom,
@@ -27,7 +28,10 @@ export default function ChantingPage() {
 	const volumeHistoryRef = useRef<number[]>([]);
 
 	const wsUrl = selectedMenu
-		? `${process.env.NEXT_PUBLIC_API_URL?.replace("http://", "ws://").replace("https://", "wss://")}/ws?room=${selectedMenu.id}`
+		? `${process.env.NEXT_PUBLIC_API_URL?.replace("http://", "ws://").replace(
+				"https://",
+				"wss://",
+			)}/ws?room=${selectedMenu.id}`
 		: "";
 
 	const { sendMessage } = useWebSocket({
@@ -73,7 +77,14 @@ export default function ChantingPage() {
 
 	useEffect(() => {
 		setCurrentStep("chanting");
-	}, [setCurrentStep]);
+		if (selectedMenu?.id) {
+			apiClient.api.v1.chant
+				.$post({ body: { menu_item_id: selectedMenu.id as any } })
+				.then((res) => {
+					setChantingState((prev) => ({ ...prev, chantText: res.chant }));
+				});
+		}
+	}, [setCurrentStep, selectedMenu, setChantingState]);
 
 	const handleChantingEnd = () => {
 		const currentVolumeHistory = volumeHistoryRef.current;

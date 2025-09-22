@@ -43,6 +43,7 @@ export const chantingStateAtom = atom<ChantingState>({
 	transcript: "",
 	maxVolume: 0,
 	averageVolume: 0,
+	chantText: "",
 	volumeHistory: [],
 });
 
