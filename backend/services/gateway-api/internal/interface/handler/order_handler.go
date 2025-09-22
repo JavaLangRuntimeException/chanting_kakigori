@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	gatewayapiv1 "chantingkakigori/gen/go/gateway_api/v1"
 	"chantingkakigori/services/gateway-api/internal/usecase"
 )
 
@@ -137,4 +138,40 @@ func (h *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request, stor
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(order)
+}
+
+// OrderGRPCServer implements gateway_api.v1.OrderService and adapts to OrderUsecase
+type OrderGRPCServer struct {
+	gatewayapiv1.UnimplementedOrderServiceServer
+	UC      usecase.OrderUsecase
+	StoreID string
+}
+
+func NewOrderGRPCServer(uc usecase.OrderUsecase, storeID string) *OrderGRPCServer {
+	return &OrderGRPCServer{UC: uc, StoreID: storeID}
+}
+
+func (s *OrderGRPCServer) PostOrder(ctx context.Context, req *gatewayapiv1.PostOrderRequest) (*gatewayapiv1.PostOrderResponse, error) {
+	order, err := s.UC.PostOrder(ctx, s.StoreID, req.GetMenuItemId())
+	if err != nil {
+		return nil, err
+	}
+	// Map to proto response
+	resp := &gatewayapiv1.PostOrderResponse{}
+	if order.Id != nil {
+		resp.Id = *order.Id
+	}
+	if order.MenuItemId != nil {
+		resp.MenuItemId = *order.MenuItemId
+	}
+	if order.MenuName != nil {
+		resp.MenuName = *order.MenuName
+	}
+	if order.Status != nil {
+		resp.Status = string(*order.Status)
+	}
+	if order.OrderNumber != nil {
+		resp.OrderNumber = int32(*order.OrderNumber)
+	}
+	return resp, nil
 }

@@ -48,3 +48,36 @@ paths:
                 type: object
                 properties:
                   status: { type: string, example: ok }
+  /ws/confirm:
+    get:
+      summary: WebSocket endpoint for confirmation and order creation trigger
+      description: |
+        WebSocket 接続先: `ws://<host>/ws/confirm?room=<ROOM_ID>`。
+        フロー（全員Ready方式にした）:
+        1. 同じ room の全クライアントが WebSocket に接続します。
+        2. 各クライアントは接続後に詠唱のステータスが完了した場合にサーバへ以下のメッセージを1回だけ送信します。
+           ```json
+           { "status": "ready" }
+           ```
+        3. 現在の接続クライアント数と "ready" を送ってきたクライアント数が一致した時点で、注文をして各クライアントに別の注文で以下のメッセージをサーバーから送信します。
+           ```json
+           {
+             "id": "store-001-1",
+             "menu_item_id": "giiku-sai",
+             "menu_name": "技育祭な いちご味",
+             "status": "pending",
+             "order_number": 1
+           }
+           ```
+        備考:
+        - クライアントが切断された場合は、接続集合が縮小されます。残っている全クライアントが既に "ready" 済みであれば即時に注文が実行されます。
+        - 同一クライアントから複数回メッセージを送らない前提です（多重カウントは行いません）。
+
+      parameters:
+        - in: query
+          name: room
+          required: true
+          schema:
+            type: string
+      responses:
+        "101": { description: Switching Protocols }

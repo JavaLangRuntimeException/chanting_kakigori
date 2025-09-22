@@ -7,7 +7,11 @@ import (
 	"os"
 	"time"
 
+	gatewayapiv1 "chantingkakigori/gen/go/gateway_api/v1"
 	"chantingkakigori/services/gateway-waiting-ws/internal/interface/handler"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
@@ -16,7 +20,19 @@ func main() {
 		httpPort = "8080"
 	}
 
+	// gRPC client to gateway-api
+	gatewayApiGrpcAddr := os.Getenv("GATEWAY_API_GRPC_ADDR")
+	if gatewayApiGrpcAddr == "" {
+		gatewayApiGrpcAddr = "gateway-api:9090"
+	}
+	conn, err := grpc.Dial(gatewayApiGrpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials())) //nolint:staticcheck // grpc.Dial is deprecated but supported throughout 1.x; migrate later
+	if err != nil {
+		log.Fatalf("failed to dial gateway-api gRPC: %v", err)
+	}
+	orderClient := gatewayapiv1.NewOrderServiceClient(conn)
+
 	wsHandler := handler.NewWSStayHandler()
+	confirmHandler := handler.NewWSConfirmHandler(orderClient)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws/stay", wsHandler.HandleWebSocketStay)
@@ -25,6 +41,7 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
+	mux.HandleFunc("/ws/confirm", confirmHandler.HandleWebSocketConfirm)
 	mux.HandleFunc("/swagger.yaml", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "/api/swagger/gateway-waiting-ws.yml")
 	})

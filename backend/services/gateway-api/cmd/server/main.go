@@ -2,15 +2,18 @@ package main
 
 import (
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"time"
 
+	gatewayapiv1 "chantingkakigori/gen/go/gateway_api/v1"
 	"chantingkakigori/services/gateway-api/internal/interface/handler"
 	"chantingkakigori/services/gateway-api/internal/usecase"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	"google.golang.org/grpc"
 )
 
 const (
@@ -40,6 +43,24 @@ func main() {
 	menuHandler := handler.NewMenuHandler(menuUsecase)
 	orderHandler := handler.NewOrderHandler(orderUsecase)
 	chantHandler := handler.NewChantHandler(chantUsecase)
+
+	// gRPC server for OrderService
+	grpcAddr := os.Getenv("GRPC_ADDR")
+	if grpcAddr == "" {
+		grpcAddr = ":9090"
+	}
+	go func() {
+		lis, err := net.Listen("tcp", grpcAddr)
+		if err != nil {
+			log.Fatalf("failed to listen gRPC: %v", err)
+		}
+		s := grpc.NewServer()
+		gatewayapiv1.RegisterOrderServiceServer(s, handler.NewOrderGRPCServer(orderUsecase, storeID))
+		log.Printf("gateway-api gRPC listening on %s", grpcAddr)
+		if err := s.Serve(lis); err != nil {
+			log.Fatalf("gRPC server error: %v", err)
+		}
+	}()
 
 	// Routing
 	e := echo.New()
