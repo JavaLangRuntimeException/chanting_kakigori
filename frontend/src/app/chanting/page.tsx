@@ -9,11 +9,10 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import {
 	chantingStateAtom,
 	currentStepAtom,
-	roomIdAtom,
 	selectedMenuAtom,
 } from "@/store/atoms";
 
-const VOLUME_THRESHOLD = 0.5;
+const VOLUME_THRESHOLD = 0.001; // 実験用に限りなく低く設定
 const CHANTING_DURATION = 10000;
 
 export default function ChantingPage() {
@@ -21,7 +20,6 @@ export default function ChantingPage() {
 	const [, setCurrentStep] = useAtom(currentStepAtom);
 	const [selectedMenu] = useAtom(selectedMenuAtom);
 	const [chantingState, setChantingState] = useAtom(chantingStateAtom);
-	const [roomId] = useAtom(roomIdAtom);
 	const [isButtonPressed, setIsButtonPressed] = useState(false);
 	const [volumeHistory, setVolumeHistory] = useState<number[]>([]);
 	const [timeRemaining, setTimeRemaining] = useState(CHANTING_DURATION / 1000);
@@ -35,20 +33,24 @@ export default function ChantingPage() {
 	const { sendMessage } = useWebSocket({
 		url: wsUrl,
 		onMessage: (data) => {
-			if (data.average !== undefined) {
-				setChantingState((prev) => ({
-					...prev,
-					averageVolume: data.average,
-				}));
-			}
+			if (data.average === undefined) return;
+			setChantingState((prev) => ({
+				...prev,
+				averageVolume: data.average,
+			}));
 		},
 	});
 
-	const { transcript, startListening, stopListening } = useSpeechRecognition({
-		onResult: (text) => {
-			setChantingState((prev) => ({ ...prev, transcript: text }));
-		},
-	});
+	const { startListening, stopListening, resetTranscript, isSupported } =
+		useSpeechRecognition({
+			onResult: (text) => {
+				console.log("音声認識結果:", text);
+				setChantingState((prev) => ({ ...prev, transcript: text }));
+			},
+			continuous: true,
+			interimResults: true,
+			lang: "ja-JP",
+		});
 
 	const { volume, startDetecting, stopDetecting } = useVolumeDetector({
 		onVolumeChange: (vol) => {
@@ -69,6 +71,22 @@ export default function ChantingPage() {
 		setCurrentStep("chanting");
 	}, [setCurrentStep]);
 
+	const handleChantingEnd = () => {
+		const avgVolume =
+			volumeHistory.length > 0
+				? volumeHistory.reduce((a, b) => a + b, 0) / volumeHistory.length
+				: 0;
+
+		if (avgVolume >= VOLUME_THRESHOLD) {
+			setCurrentStep("chanting_complete");
+			router.push("/chanting/complete");
+		} else {
+			setCurrentStep("chanting_result");
+			router.push("/chanting/result");
+		}
+	};
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (isButtonPressed && startTimeRef.current === null) {
 			startTimeRef.current = Date.now();
@@ -95,23 +113,11 @@ export default function ChantingPage() {
 		};
 	}, [isButtonPressed]);
 
-	const handleChantingEnd = () => {
-		const avgVolume =
-			volumeHistory.length > 0
-				? volumeHistory.reduce((a, b) => a + b, 0) / volumeHistory.length
-				: 0;
-
-		if (avgVolume >= VOLUME_THRESHOLD) {
-			setCurrentStep("chanting_complete");
-			router.push("/chanting/complete");
-		} else {
-			setCurrentStep("chanting_result");
-			router.push("/chanting/result");
-		}
-	};
-
 	const handleButtonPress = () => {
 		setIsButtonPressed(true);
+		// 音声認識開始前にtranscriptをリセット
+		resetTranscript();
+		setChantingState((prev) => ({ ...prev, transcript: "" }));
 		startListening();
 		startDetecting();
 	};
@@ -137,16 +143,24 @@ export default function ChantingPage() {
 						<p className="text-blue-700">大きな声で詠唱してください！</p>
 					</div>
 
-					<div className="bg-blue-50 rounded-lg p-4 mb-6">
-						<p className="text-sm text-blue-600 mb-1">選択中のメニュー</p>
-						<p className="font-semibold text-blue-900">{selectedMenu.name}</p>
-					</div>
+					{chantingState.chantText && (
+						<div className="bg-white rounded-lg p-6 mb-6 border border-gray-300">
+							<p className="text-center text-gray-700 mb-3 font-bold text-lg">
+								詠唱文章
+							</p>
+							<p className="text-gray-900 leading-loose text-center font-bold text-base md:text-lg">
+								{chantingState.chantText}
+							</p>
+						</div>
+					)}
 
 					<div className="mb-6">
 						<div className="flex items-center justify-between mb-2">
 							<span className="text-sm text-gray-600">現在の声量</span>
 							<span className="text-lg font-bold text-blue-600">
 								{Math.round(chantingState.volume * 100)}%
+								<br />
+								みんなの声量：{Math.round(volume * 100)}%
 							</span>
 						</div>
 						<div className="w-full bg-gray-200 rounded-full h-6">
@@ -176,11 +190,21 @@ export default function ChantingPage() {
 						</div>
 					)}
 
-					{transcript && (
+					{!isSupported && (
+						<div className="mb-6">
+							<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+								<p className="text-sm text-yellow-700">
+									⚠️ お使いのブラウザは音声認識をサポートしていません
+								</p>
+							</div>
+						</div>
+					)}
+
+					{chantingState.transcript && (
 						<div className="mb-6">
 							<div className="bg-gray-50 rounded-lg p-3">
 								<p className="text-sm text-gray-600 mb-1">認識された言葉</p>
-								<p className="text-gray-900">{transcript}</p>
+								<p className="text-gray-900">{chantingState.transcript}</p>
 							</div>
 						</div>
 					)}

@@ -28,7 +28,6 @@ export default function ChantingResultPage() {
 			<div className="max-w-md w-full">
 				<div className="bg-white rounded-lg shadow-lg p-8">
 					<div className="text-center mb-8">
-						<div className="text-6xl mb-4">😔</div>
 						<h1 className="text-3xl font-bold text-gray-900 mb-2">詠唱失敗</h1>
 						<p className="text-gray-600">声量が足りませんでした</p>
 					</div>
@@ -54,13 +53,6 @@ export default function ChantingResultPage() {
 								<p className="text-gray-900">{chantingState.transcript}</p>
 							</div>
 						)}
-					</div>
-
-					<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-						<p className="text-yellow-800 text-sm">
-							💡
-							ヒント：もっと大きな声で、恥ずかしさを捨てて詠唱してみましょう！
-						</p>
 					</div>
 
 					<button

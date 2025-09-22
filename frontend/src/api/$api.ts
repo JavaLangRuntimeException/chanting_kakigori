@@ -5,7 +5,9 @@ import type { Methods as Methods_1o6vqb } from "./api/v1/stores/orders";
 import type { Methods as Methods_e8ra0j } from "./api/v1/stores/orders/_orderId@string";
 
 const api = <T>({ baseURL, fetch }: AspidaClient<T>) => {
-	const prefix = (baseURL === undefined ? "/" : baseURL).replace(/\/$/, "");
+	const prefix = (
+		baseURL === undefined ? "http://localhost:8080" : baseURL
+	).replace(/\/$/, "");
 	const PATH0 = "/api/v1/chant";
 	const PATH1 = "/api/v1/stores/menu";
 	const PATH2 = "/api/v1/stores/orders";

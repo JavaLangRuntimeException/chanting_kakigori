@@ -33,9 +33,11 @@ export default function OrderLoadingPage() {
 			</div>
 
 			{showToast && (
-				<div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-red-500 text-white px-8 py-6 rounded-lg shadow-2xl z-50">
-					<p className="font-medium text-lg text-center">
-						会場が冷え切っているため、かき氷は注文できませんでした
+				<div className="fixed inset-x-4 md:inset-x-auto md:left-1/2 top-1/2 md:-translate-x-1/2 -translate-y-1/2 bg-red-500 text-white px-6 py-8 rounded-lg shadow-2xl z-50 md:max-w-md">
+					<p className="font-bold text-2xl md:text-2xl text-center leading-relaxed">
+						会場が冷え切っているため、
+						<br className="sm:hidden" />
+						かき氷は注文できませんでした
 					</p>
 				</div>
 			)}

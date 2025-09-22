@@ -18,6 +18,7 @@ export interface ChantingState {
 	transcript: string;
 	maxVolume: number;
 	averageVolume: number;
+	chantText?: string; // 詠唱する文章
 }
 
 export interface WaitingRoomState {

@@ -27,6 +27,20 @@ export const useWebSocket = ({
 	const reconnectAttemptsRef = useRef(0);
 	const maxReconnectAttemptsRef = useRef(10);
 
+	// useCallbackを使わず、refを使ってコールバック関数を保持
+	const onMessageRef = useRef(onMessage);
+	const onOpenRef = useRef(onOpen);
+	const onCloseRef = useRef(onClose);
+	const onErrorRef = useRef(onError);
+
+	// コールバック関数が変更されたときにrefを更新
+	useEffect(() => {
+		onMessageRef.current = onMessage;
+		onOpenRef.current = onOpen;
+		onCloseRef.current = onClose;
+		onErrorRef.current = onError;
+	}, [onMessage, onOpen, onClose, onError]);
+
 	const connect = useCallback(() => {
 		if (
 			isConnectingRef.current ||
@@ -42,7 +56,8 @@ export const useWebSocket = ({
 
 			ws.onopen = (event) => {
 				isConnectingRef.current = false;
-				onOpen?.(event);
+				reconnectAttemptsRef.current = 0; // 接続成功時にカウンターをリセット
+				onOpenRef.current?.(event);
 			};
 
 			ws.onmessage = (event) => {
@@ -56,7 +71,7 @@ export const useWebSocket = ({
 						},
 						{} as any,
 					);
-					onMessage?.(processedData);
+					onMessageRef.current?.(processedData);
 				} catch (error) {
 					console.error("Failed to parse WebSocket message:", error);
 				}
@@ -64,18 +79,37 @@ export const useWebSocket = ({
 
 			ws.onclose = (event) => {
 				isConnectingRef.current = false;
-				onClose?.(event);
+				onCloseRef.current?.(event);
 
-				if (autoReconnect && !event.wasClean) {
+				// 正常な切断（wasClean=true）または最大再接続回数を超えた場合は再接続しない
+				if (
+					autoReconnect &&
+					!event.wasClean &&
+					reconnectAttemptsRef.current < maxReconnectAttemptsRef.current
+				) {
+					reconnectAttemptsRef.current++;
+					// 指数バックオフ：再試行ごとに待機時間を増やす
+					const delay = Math.min(
+						reconnectDelay * 1.5 ** reconnectAttemptsRef.current,
+						30000,
+					);
+					console.log(
+						`WebSocket reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current})`,
+					);
+
 					reconnectTimeoutRef.current = setTimeout(() => {
 						connect();
-					}, reconnectDelay);
+					}, delay);
+				} else if (
+					reconnectAttemptsRef.current >= maxReconnectAttemptsRef.current
+				) {
+					console.error("Max reconnection attempts reached");
 				}
 			};
 
 			ws.onerror = (event) => {
 				isConnectingRef.current = false;
-				onError?.(event);
+				onErrorRef.current?.(event);
 			};
 
 			wsRef.current = ws;
@@ -83,7 +117,7 @@ export const useWebSocket = ({
 			isConnectingRef.current = false;
 			console.error("Failed to create WebSocket connection:", error);
 		}
-	}, [url, onMessage, onOpen, onClose, onError, autoReconnect, reconnectDelay]);
+	}, [url, autoReconnect, reconnectDelay]);
 
 	const disconnect = useCallback(() => {
 		if (reconnectTimeoutRef.current) {
@@ -112,13 +146,16 @@ export const useWebSocket = ({
 		}
 	}, []);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: 無限ループ防止のため
 	useEffect(() => {
+		if (!url) return;
+
 		connect();
 
 		return () => {
 			disconnect();
 		};
-	}, [connect, disconnect]);
+	}, [url]); // connectを依存配列から除外
 
 	return { sendMessage, disconnect, reconnect: connect };
 };

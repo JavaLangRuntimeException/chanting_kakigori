@@ -387,22 +387,20 @@ export function Content() {
 										scheduleItems.map((item) => (
 											<div
 												key={item.id}
-												className="p-4 flex items-center justify-between"
+												className="p-4 flex items-center justify-between gap-3"
 											>
-												<div className="flex items-center gap-6">
-													<div>
-														<p className="text-sm font-medium text-gray-900">
-															{item.name}
-														</p>
-														<p className="text-xs text-gray-500">
-															{item.description}
-														</p>
-													</div>
+												<div className="flex-1 min-w-0">
+													<p className="text-sm font-medium text-gray-900 truncate">
+														{item.name}
+													</p>
+													<p className="text-xs text-gray-500 line-clamp-2">
+														{item.description}
+													</p>
 												</div>
 												<button
 													type="button"
 													onClick={() => handleMenuSelect(item)}
-													className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-800 transition-colors"
+													className="px-3 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-800 transition-colors flex-shrink-0 whitespace-nowrap"
 												>
 													申込へ
 												</button>
