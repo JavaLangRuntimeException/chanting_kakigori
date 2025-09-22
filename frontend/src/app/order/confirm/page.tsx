@@ -19,7 +19,7 @@ export default function OrderConfirmPage() {
 	const [, setCurrentStep] = useAtom(currentStepAtom);
 	const [orderState, setOrderState] = useAtom(orderStateAtom);
 	const [selectedMenu] = useAtom(selectedMenuAtom);
-	const { transcript } = useAtomValue(chantingStateAtom);
+	const { chantText } = useAtomValue(chantingStateAtom);
 	const [pollingCount, setPollingCount] = useState(0);
 
 	useEffect(() => {
@@ -45,10 +45,10 @@ export default function OrderConfirmPage() {
 		#技育祭 でかき氷を注文しました！
 		
 		【詠唱】
-${transcript}
+		${chantText}
 
-【注文】
-${selectedMenu?.name}
+		【注文】
+		${selectedMenu?.name}
 
 ▼参加はこちらから
 https://geek.supporterz.jp/geeksai/2025autumn
