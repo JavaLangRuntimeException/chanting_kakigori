@@ -1,20 +1,49 @@
 import type { AspidaClient, BasicHeaders } from "aspida";
+import type { Methods as Methods_n0fc9h } from "./api/v1/chant";
 import type { Methods as Methods_39nwfh } from "./api/v1/stores/menu";
 import type { Methods as Methods_1o6vqb } from "./api/v1/stores/orders";
 import type { Methods as Methods_e8ra0j } from "./api/v1/stores/orders/_orderId@string";
 
 const api = <T>({ baseURL, fetch }: AspidaClient<T>) => {
-	const prefix = (
-		baseURL === undefined ? "http://localhost:8080" : baseURL
-	).replace(/\/$/, "");
-	const PATH0 = "/api/v1/stores/menu";
-	const PATH1 = "/api/v1/stores/orders";
+	const prefix = (baseURL === undefined ? "/" : baseURL).replace(/\/$/, "");
+	const PATH0 = "/api/v1/chant";
+	const PATH1 = "/api/v1/stores/menu";
+	const PATH2 = "/api/v1/stores/orders";
 	const GET = "GET";
 	const POST = "POST";
 
 	return {
 		api: {
 			v1: {
+				chant: {
+					/**
+					 * @returns Generated chant
+					 */
+					post: (option: {
+						body: Methods_n0fc9h["post"]["reqBody"];
+						config?: T | undefined;
+					}) =>
+						fetch<
+							Methods_n0fc9h["post"]["resBody"],
+							BasicHeaders,
+							Methods_n0fc9h["post"]["status"]
+						>(prefix, PATH0, POST, option).json(),
+					/**
+					 * @returns Generated chant
+					 */
+					$post: (option: {
+						body: Methods_n0fc9h["post"]["reqBody"];
+						config?: T | undefined;
+					}) =>
+						fetch<
+							Methods_n0fc9h["post"]["resBody"],
+							BasicHeaders,
+							Methods_n0fc9h["post"]["status"]
+						>(prefix, PATH0, POST, option)
+							.json()
+							.then((r) => r.body),
+					$path: () => `${prefix}${PATH0}`,
+				},
 				stores: {
 					menu: {
 						/**
@@ -25,7 +54,7 @@ const api = <T>({ baseURL, fetch }: AspidaClient<T>) => {
 								Methods_39nwfh["get"]["resBody"],
 								BasicHeaders,
 								Methods_39nwfh["get"]["status"]
-							>(prefix, PATH0, GET, option).json(),
+							>(prefix, PATH1, GET, option).json(),
 						/**
 						 * @returns Menu list
 						 */
@@ -34,14 +63,14 @@ const api = <T>({ baseURL, fetch }: AspidaClient<T>) => {
 								Methods_39nwfh["get"]["resBody"],
 								BasicHeaders,
 								Methods_39nwfh["get"]["status"]
-							>(prefix, PATH0, GET, option)
+							>(prefix, PATH1, GET, option)
 								.json()
 								.then((r) => r.body),
-						$path: () => `${prefix}${PATH0}`,
+						$path: () => `${prefix}${PATH1}`,
 					},
 					orders: {
 						_orderId: (val4: string) => {
-							const prefix4 = `${PATH1}/${val4}`;
+							const prefix4 = `${PATH2}/${val4}`;
 
 							return {
 								/**
@@ -78,7 +107,7 @@ const api = <T>({ baseURL, fetch }: AspidaClient<T>) => {
 								Methods_1o6vqb["post"]["resBody"],
 								BasicHeaders,
 								Methods_1o6vqb["post"]["status"]
-							>(prefix, PATH1, POST, option).json(),
+							>(prefix, PATH2, POST, option).json(),
 						/**
 						 * @returns Order created
 						 */
@@ -90,10 +119,10 @@ const api = <T>({ baseURL, fetch }: AspidaClient<T>) => {
 								Methods_1o6vqb["post"]["resBody"],
 								BasicHeaders,
 								Methods_1o6vqb["post"]["status"]
-							>(prefix, PATH1, POST, option)
+							>(prefix, PATH2, POST, option)
 								.json()
 								.then((r) => r.body),
-						$path: () => `${prefix}${PATH1}`,
+						$path: () => `${prefix}${PATH2}`,
 					},
 				},
 			},
