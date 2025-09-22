@@ -1,9 +1,12 @@
 "use client";
 
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
+import { Twitter } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
+	chantingStateAtom,
 	currentStepAtom,
 	orderStateAtom,
 	selectedMenuAtom,
@@ -16,6 +19,7 @@ export default function OrderConfirmPage() {
 	const [, setCurrentStep] = useAtom(currentStepAtom);
 	const [orderState, setOrderState] = useAtom(orderStateAtom);
 	const [selectedMenu] = useAtom(selectedMenuAtom);
+	const { transcript } = useAtomValue(chantingStateAtom);
 	const [pollingCount, setPollingCount] = useState(0);
 
 	useEffect(() => {
@@ -35,6 +39,26 @@ export default function OrderConfirmPage() {
 
 		return () => clearInterval(interval);
 	}, [pollingCount, router, setOrderState]);
+
+	const handleTweet = () => {
+		const tweetText = `
+		#技育祭 でかき氷を注文しました！
+		
+		【詠唱】
+${transcript}
+
+【注文】
+${selectedMenu?.name}
+
+▼参加はこちらから
+https://geek.supporterz.jp/geeksai/2025autumn
+
+##詠唱注文システム`;
+		const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+			tweetText,
+		)}`;
+		window.open(tweetUrl, "_blank");
+	};
 
 	if (!selectedMenu) {
 		router.push("/");
@@ -89,6 +113,13 @@ export default function OrderConfirmPage() {
 							自動更新されます
 						</p>
 					</div>
+					<Button
+						onClick={handleTweet}
+						className="w-full bg-blue-400 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2"
+					>
+						<Twitter size={20} />
+						注文をツイートする
+					</Button>
 				</div>
 			</div>
 		</div>
