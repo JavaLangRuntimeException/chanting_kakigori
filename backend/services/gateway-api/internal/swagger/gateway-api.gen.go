@@ -10,6 +10,14 @@ const (
 	WaitingPickup OrderResponseStatus = "waitingPickup"
 )
 
+// Defines values for PostApiV1ChantJSONBodyMenuItemId.
+const (
+	GiikuCamp PostApiV1ChantJSONBodyMenuItemId = "giiku-camp"
+	GiikuHaku PostApiV1ChantJSONBodyMenuItemId = "giiku-haku"
+	GiikuSai  PostApiV1ChantJSONBodyMenuItemId = "giiku-sai"
+	GiikuTen  PostApiV1ChantJSONBodyMenuItemId = "giiku-ten"
+)
+
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
 	Error   *string `json:"error,omitempty"`
@@ -35,10 +43,21 @@ type OrderResponse struct {
 // OrderResponseStatus defines model for OrderResponse.Status.
 type OrderResponseStatus string
 
+// PostApiV1ChantJSONBody defines parameters for PostApiV1Chant.
+type PostApiV1ChantJSONBody struct {
+	MenuItemId *PostApiV1ChantJSONBodyMenuItemId `json:"menu_item_id,omitempty"`
+}
+
+// PostApiV1ChantJSONBodyMenuItemId defines parameters for PostApiV1Chant.
+type PostApiV1ChantJSONBodyMenuItemId string
+
 // PostApiV1StoresOrdersJSONBody defines parameters for PostApiV1StoresOrders.
 type PostApiV1StoresOrdersJSONBody struct {
 	MenuItemId *string `json:"menu_item_id,omitempty"`
 }
+
+// PostApiV1ChantJSONRequestBody defines body for PostApiV1Chant for application/json ContentType.
+type PostApiV1ChantJSONRequestBody PostApiV1ChantJSONBody
 
 // PostApiV1StoresOrdersJSONRequestBody defines body for PostApiV1StoresOrders for application/json ContentType.
 type PostApiV1StoresOrdersJSONRequestBody PostApiV1StoresOrdersJSONBody

@@ -14,7 +14,8 @@
         "ci",
         "build",
         "chore",
-        "test"
+        "test",
+        "swagger"
       ]
     ],
     "type-case": [
