@@ -80,9 +80,16 @@ func (h *wsHandler) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		rm.mu.Lock()
 		delete(rm.clients, cl)
+		empty := len(rm.clients) == 0
 		rm.mu.Unlock()
 		_ = conn.Close()
 		log.Printf("ws disconnected: room=%s remote=%s", params.Room, r.RemoteAddr)
+		if empty {
+			// remove empty room so next session starts cleanly
+			h.mu.Lock()
+			delete(h.rooms, params.Room)
+			h.mu.Unlock()
+		}
 	}()
 
 	// Bridge to kakigori Aggregate stream
