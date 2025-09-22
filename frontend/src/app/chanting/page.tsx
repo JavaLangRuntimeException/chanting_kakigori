@@ -129,23 +129,23 @@ export default function ChantingPage() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-b from-purple-50 to-white flex items-center justify-center px-4">
+		<div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
 			<div className="max-w-md w-full">
 				<div className="bg-white rounded-lg shadow-lg p-8">
 					<div className="text-center mb-8">
-						<h1 className="text-3xl font-bold text-gray-900 mb-2">詠唱中</h1>
-						<p className="text-gray-600">大きな声で詠唱してください！</p>
+						<h1 className="text-3xl font-bold text-blue-900 mb-2">詠唱中</h1>
+						<p className="text-blue-700">大きな声で詠唱してください！</p>
 					</div>
 
-					<div className="bg-purple-50 rounded-lg p-4 mb-6">
-						<p className="text-sm text-gray-600 mb-1">選択中のメニュー</p>
-						<p className="font-semibold text-gray-900">{selectedMenu.name}</p>
+					<div className="bg-blue-50 rounded-lg p-4 mb-6">
+						<p className="text-sm text-blue-600 mb-1">選択中のメニュー</p>
+						<p className="font-semibold text-blue-900">{selectedMenu.name}</p>
 					</div>
 
 					<div className="mb-6">
 						<div className="flex items-center justify-between mb-2">
 							<span className="text-sm text-gray-600">現在の声量</span>
-							<span className="text-lg font-bold text-purple-600">
+							<span className="text-lg font-bold text-blue-600">
 								{Math.round(chantingState.volume * 100)}%
 							</span>
 						</div>
@@ -154,7 +154,7 @@ export default function ChantingPage() {
 								className={`h-6 rounded-full transition-all duration-100 ${
 									chantingState.volume >= VOLUME_THRESHOLD
 										? "bg-green-500"
-										: "bg-purple-500"
+										: "bg-blue-500"
 								}`}
 								style={{ width: `${chantingState.volume * 100}%` }}
 							/>
@@ -193,16 +193,12 @@ export default function ChantingPage() {
 						onTouchEnd={handleButtonRelease}
 						className={`w-full py-6 rounded-lg font-bold text-xl transition-all ${
 							isButtonPressed
-								? "bg-red-600 text-white scale-95"
-								: "bg-purple-600 text-white hover:bg-purple-700"
+								? "bg-blue-700 text-white scale-95"
+								: "bg-blue-600 text-white hover:bg-blue-700"
 						}`}
 					>
 						{isButtonPressed ? "詠唱中..." : "押して詠唱"}
 					</button>
-
-					<p className="text-center text-sm text-gray-500 mt-4">
-						ボタンを押し続けている間、音声を取得します
-					</p>
 				</div>
 			</div>
 		</div>
