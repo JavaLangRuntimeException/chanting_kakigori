@@ -9,8 +9,19 @@ metadata:
     networking.gke.io/managed-certificates: "chanting-kakigori-ssl-cert"
 spec:
   rules:
+    # カスタムドメインでのアクセス
     - host: chanting-kakigori-backend.taramanji.com
       http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 80
+    # IPアドレス直接アクセス（Hostヘッダーなし）
+    - http:
         paths:
           - path: /
             pathType: Prefix
