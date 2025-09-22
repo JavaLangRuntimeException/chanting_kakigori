@@ -42,6 +42,16 @@ type OrderUsecase interface {
 	GetOrderByID(ctx context.Context, storeID string, orderID string) (*GetOrderByIDResponse, error)
 }
 
+// UpstreamError represents a non-2xx response from the upstream API.
+type UpstreamError struct {
+	StatusCode int
+	Body       string
+}
+
+func (e *UpstreamError) Error() string {
+	return fmt.Sprintf("upstream returned status %d: %s", e.StatusCode, e.Body)
+}
+
 func (u *OrderClient) PostOrder(ctx context.Context, storeID string, menuItemID string) (*openapi.OrderResponse, error) {
 	base, err := url.Parse(u.BaseURL)
 	if err != nil {
@@ -71,7 +81,7 @@ func (u *OrderClient) PostOrder(ctx context.Context, storeID string, menuItemID 
 		// Read a small portion of the body for diagnostics
 		limited := io.LimitReader(resp.Body, 1024)
 		b, _ := io.ReadAll(limited)
-		return nil, fmt.Errorf("upstream returned status %d: %s", resp.StatusCode, string(b))
+		return nil, &UpstreamError{StatusCode: resp.StatusCode, Body: string(b)}
 	}
 
 	// Read entire body once to allow trying multiple shapes
@@ -151,7 +161,9 @@ func (u *OrderClient) GetOrderByID(ctx context.Context, storeID string, orderID 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("upstream returned status %d", resp.StatusCode)
+		limited := io.LimitReader(resp.Body, 1024)
+		b, _ := io.ReadAll(limited)
+		return nil, &UpstreamError{StatusCode: resp.StatusCode, Body: string(b)}
 	}
 
 	// Read entire body to support multiple possible shapes
