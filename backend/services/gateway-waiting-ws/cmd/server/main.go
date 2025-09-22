@@ -35,16 +35,30 @@ func main() {
 	confirmHandler := handler.NewWSConfirmHandler(orderClient)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/ws/stay", wsHandler.HandleWebSocketStay)
-	mux.HandleFunc("/ws/health", func(w http.ResponseWriter, r *http.Request) {
+	// CORS middleware wrapper
+	withCORS := func(h http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "*")
+			if r.Method == http.MethodOptions {
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+			h(w, r)
+		}
+	}
+
+	mux.HandleFunc("/ws/stay", withCORS(wsHandler.HandleWebSocketStay))
+	mux.HandleFunc("/ws/health", withCORS(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("/ws/health called from %s", r.RemoteAddr)
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
-	})
-	mux.HandleFunc("/ws/confirm", confirmHandler.HandleWebSocketConfirm)
-	mux.HandleFunc("/swagger.yaml", func(w http.ResponseWriter, r *http.Request) {
+	}))
+	mux.HandleFunc("/ws/confirm", withCORS(confirmHandler.HandleWebSocketConfirm))
+	mux.HandleFunc("/swagger.yaml", withCORS(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "/api/swagger/gateway-waiting-ws.yml")
-	})
+	}))
 
 	srv := &http.Server{
 		Addr:              ":" + httpPort,

@@ -43,16 +43,30 @@ func main() {
 	wsHandler := handler.NewWSHandler(aggregatorClient)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/ws", wsHandler.HandleWebSocket)
-	mux.HandleFunc("/ws/health", func(w http.ResponseWriter, r *http.Request) {
+	// CORS middleware wrapper
+	withCORS := func(h http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "*")
+			if r.Method == http.MethodOptions {
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+			h(w, r)
+		}
+	}
+
+	mux.HandleFunc("/ws", withCORS(wsHandler.HandleWebSocket))
+	mux.HandleFunc("/ws/health", withCORS(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("/ws/health called from %s", r.RemoteAddr)
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
-	})
+	}))
 	// Serve swagger alias to gateway-ws.yml
-	mux.HandleFunc("/swagger.yaml", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/swagger.yaml", withCORS(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "/api/swagger/gateway-ws.yml")
-	})
+	}))
 
 	srv := &http.Server{
 		Addr:              ":" + httpPort,
