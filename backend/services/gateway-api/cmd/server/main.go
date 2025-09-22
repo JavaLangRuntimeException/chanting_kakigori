@@ -9,6 +9,7 @@ import (
 	"chantingkakigori/services/gateway-api/internal/interface/handler"
 	"chantingkakigori/services/gateway-api/internal/usecase"
 
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,6 +17,10 @@ const (
 	baseURL = "https://kakigori-api.fly.dev"
 	storeID = "HKWZRTNL"
 )
+
+func init() {
+	_ = godotenv.Load(".env")
+}
 
 func main() {
 	httpPort := os.Getenv("PORT")
@@ -26,10 +31,15 @@ func main() {
 	// DI(Usecase)
 	menuUsecase := usecase.NewMenuUsecase(baseURL)
 	orderUsecase := usecase.NewOrderUsecase(baseURL)
+	chantUsecase, err := usecase.NewChantUsecase()
+	if err != nil {
+		log.Fatalf("failed to init chant usecase: %v", err)
+	}
 
 	// DI(Handler)
 	menuHandler := handler.NewMenuHandler(menuUsecase)
 	orderHandler := handler.NewOrderHandler(orderUsecase)
+	chantHandler := handler.NewChantHandler(chantUsecase)
 
 	// Routing
 	e := echo.New()
@@ -49,6 +59,10 @@ func main() {
 	})
 	e.GET("/api/v1/stores/orders/:order_id", func(c echo.Context) error {
 		orderHandler.GetOrderByID(c.Response().Writer, c.Request(), storeID, c.Param("order_id"))
+		return nil
+	})
+	e.POST("/api/v1/chant", func(c echo.Context) error {
+		chantHandler.PostChant(c.Response().Writer, c.Request())
 		return nil
 	})
 
