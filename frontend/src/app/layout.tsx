@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "かき氷詠唱システム - 技育祭2025",
+	title: "かき氷詠唱注文システム - 技育祭2025",
 	description: "君の詠唱で技育祭を盛り上げよう！",
 };
 
