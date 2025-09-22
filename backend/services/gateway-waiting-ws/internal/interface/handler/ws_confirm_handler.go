@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -164,6 +165,7 @@ func (h *wsConfirmHandler) orderForRoom(menuID string, rm *confirmRoom) {
 	if len(rm.clients) == 0 {
 		// best-effort removal; ignore if not present
 		// actual client defers will remove from maps upon close
+		fmt.Println("cleanup empty room")
 	}
 	rm.mu.Unlock()
 }
