@@ -103,30 +103,25 @@ func (h *wsStayHandler) HandleWebSocketStay(w http.ResponseWriter, r *http.Reque
 	case 2:
 		h.broadcast(rm, stayPayload{StayNum: "2", StartTime: "null"})
 	case 3:
-		// After 10 seconds, broadcast with start_time then disconnect all
-		go func(joinedAt time.Time) {
-			// initial broadcast can be optional; spec wants after 10s with time
-			// Wait 10 seconds from third join
-			delay := time.Until(joinedAt.Add(10 * time.Second))
-			if delay < 0 {
-				delay = 0
-			}
-			timer := time.NewTimer(delay)
-			<-timer.C
-			startISO := joinedAt.Add(10 * time.Second).UTC().Format(time.RFC3339)
-			h.broadcast(rm, stayPayload{StayNum: "3", StartTime: startISO})
-			// disconnect everyone
-			rm.mu.Lock()
-			clients := make([]*stayClient, 0, len(rm.clients))
-			for c := range rm.clients {
-				clients = append(clients, c)
-			}
-			rm.mu.Unlock()
-			for _, c := range clients {
-				_ = c.conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "session ended"), time.Now().Add(2*time.Second))
-				_ = c.conn.Close()
-			}
-		}(rm.thirdJoinedAt)
+		// Immediately broadcast with start_time = now + 10s (JST), then disconnect all
+		loc, err := time.LoadLocation("Asia/Tokyo")
+		var startISO string
+		if err == nil {
+			startISO = time.Now().In(loc).Add(10 * time.Second).Format(time.RFC3339)
+		} else {
+			startISO = time.Now().Add(10 * time.Second).Format(time.RFC3339)
+		}
+		h.broadcast(rm, stayPayload{StayNum: "3", StartTime: startISO})
+		rm.mu.Lock()
+		clients := make([]*stayClient, 0, len(rm.clients))
+		for c := range rm.clients {
+			clients = append(clients, c)
+		}
+		rm.mu.Unlock()
+		for _, c := range clients {
+			_ = c.conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "session ended"), time.Now().Add(2*time.Second))
+			_ = c.conn.Close()
+		}
 	default:
 		// 4 以上は仕様外だが、3 と同様に終了扱いにしておく
 		// broadcast latest known state without start_time
