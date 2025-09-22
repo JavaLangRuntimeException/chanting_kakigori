@@ -91,9 +91,16 @@ func (h *wsStayHandler) HandleWebSocketStay(w http.ResponseWriter, r *http.Reque
 	defer func() {
 		rm.mu.Lock()
 		delete(rm.clients, cl)
+		empty := len(rm.clients) == 0
 		rm.mu.Unlock()
 		_ = conn.Close()
 		log.Printf("stay ws disconnected: room=%s remote=%s", roomID, r.RemoteAddr)
+		if empty {
+			// remove empty room for clean reset
+			h.mu.Lock()
+			delete(h.rooms, roomID)
+			h.mu.Unlock()
+		}
 	}()
 
 	// Immediately broadcast current state per spec
