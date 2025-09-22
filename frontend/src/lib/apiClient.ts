@@ -8,6 +8,16 @@ const axiosInstance = axios.create({
 	headers: {
 		"Content-Type": "application/json",
 	},
+	transformResponse: [
+		(data) => {
+			if (!data) return data;
+			try {
+				return JSON.parse(data);
+			} catch {
+				return data;
+			}
+		},
+	],
 });
 
 export const apiClient = api(aspida(axiosInstance));

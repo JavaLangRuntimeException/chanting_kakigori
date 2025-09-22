@@ -1,28 +1,44 @@
-// biome-ignore lint/a11y/noSvgWithoutTitle: SVG icons don't need titles
-/** biome-ignore-all lint/a11y/noSvgWithoutTitle: <explanation> */
-
 "use client";
 
+import { useAtom } from "jotai";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { MenuItem } from "@/api/@types";
-import { mockMenuData } from "@/app/_mocks/menuData";
+import { apiClient } from "@/lib/apiClient";
+import { currentStepAtom, selectedMenuAtom } from "@/store/atoms";
 
 export function Content() {
 	const [scheduleItems, setScheduleItems] = useState<MenuItem[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const router = useRouter();
+	const [, setSelectedMenu] = useAtom(selectedMenuAtom);
+	const [, setCurrentStep] = useAtom(currentStepAtom);
 
 	useEffect(() => {
 		const fetchMenu = async () => {
-			// TODO: 実際のAPI呼び出しに置き換える
-			// const apiClient = aspida(axios.create({ baseURL: "http://localhost:8080" }));
-			// const response = await apiClient.api.v1.stores.menu.$get();
-			// setScheduleItems(response.menu || []);
-
-			// モックデータを使用
-			setScheduleItems(mockMenuData.menu || []);
+			try {
+				setIsLoading(true);
+				const response = await apiClient.api.v1.stores.menu.$get();
+				setScheduleItems(response.menu || []);
+				setError(null);
+			} catch (err) {
+				console.error("Failed to fetch menu:", err);
+				setError("メニューの取得に失敗しました");
+				setScheduleItems([]);
+			} finally {
+				setIsLoading(false);
+			}
 		};
 
 		fetchMenu();
 	}, []);
+
+	const handleMenuSelect = (item: MenuItem) => {
+		setSelectedMenu(item);
+		setCurrentStep("order_loading");
+		router.push("/order/loading");
+	};
 	return (
 		<div className="min-h-screen bg-gray-50">
 			<header className="bg-white border-b border-gray-200">
@@ -59,6 +75,12 @@ export function Content() {
 					</div>
 
 					<div className="p-6">
+						{error && (
+							<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+								<p className="text-yellow-800 text-sm">{error}</p>
+							</div>
+						)}
+
 						<div className="flex items-center gap-3 mb-4">
 							<div className="flex items-center gap-2">
 								<img
@@ -344,6 +366,7 @@ export function Content() {
 											fill="currentColor"
 											viewBox="0 0 24 24"
 											aria-label="メールアイコン"
+											role="img"
 										>
 											<path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z" />
 										</svg>
@@ -353,29 +376,43 @@ export function Content() {
 									</button>
 								</div>
 								<div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100">
-									{scheduleItems.map((item) => (
-										<div
-											key={item.id}
-											className="p-4 flex items-center justify-between"
-										>
-											<div className="flex items-center gap-6">
-												<div>
-													<p className="text-sm font-medium text-gray-900">
-														{item.name}
-													</p>
-													<p className="text-xs text-gray-500">
-														{item.description}
-													</p>
-												</div>
-											</div>
-											<button
-												type="button"
-												className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-800 transition-colors"
-											>
-												申込へ
-											</button>
+									{isLoading ? (
+										<div className="p-8 text-center">
+											<div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+											<p className="mt-3 text-sm text-gray-600">
+												メニューを読み込み中...
+											</p>
 										</div>
-									))}
+									) : scheduleItems.length > 0 ? (
+										scheduleItems.map((item) => (
+											<div
+												key={item.id}
+												className="p-4 flex items-center justify-between"
+											>
+												<div className="flex items-center gap-6">
+													<div>
+														<p className="text-sm font-medium text-gray-900">
+															{item.name}
+														</p>
+														<p className="text-xs text-gray-500">
+															{item.description}
+														</p>
+													</div>
+												</div>
+												<button
+													type="button"
+													onClick={() => handleMenuSelect(item)}
+													className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-800 transition-colors"
+												>
+													申込へ
+												</button>
+											</div>
+										))
+									) : (
+										<div className="p-8 text-center text-sm text-gray-500">
+											メニューがありません
+										</div>
+									)}
 								</div>
 							</div>
 						</div>
