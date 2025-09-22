@@ -63,12 +63,24 @@ func (h *wsConfirmHandler) HandleWebSocketConfirm(w http.ResponseWriter, r *http
 		rm.mu.Lock()
 		delete(rm.clients, conn)
 		delete(rm.ready, conn)
-		shouldOrder := !rm.ordered && len(rm.clients) > 0 && len(rm.ready) == len(rm.clients)
+		empty := len(rm.clients) == 0
+		shouldOrder := !rm.ordered && !empty && len(rm.ready) == len(rm.clients)
+		if empty {
+			// reset state when no one remains in the room
+			rm.ordered = false
+			rm.ready = make(map[*websocket.Conn]struct{})
+		}
 		rm.mu.Unlock()
 		if shouldOrder {
 			h.orderForRoom(room, rm)
 		}
 		_ = conn.Close()
+		if empty {
+			// remove the room entry to fully reset counts/state
+			h.mu.Lock()
+			delete(h.rooms, room)
+			h.mu.Unlock()
+		}
 	}()
 
 	// Keep connection open (noop read loop)
@@ -139,4 +151,19 @@ func (h *wsConfirmHandler) orderForRoom(menuID string, rm *confirmRoom) {
 		b, _ := json.Marshal(out)
 		_ = c.WriteMessage(websocket.TextMessage, b)
 	}
+
+	// After sending results, close connections from the server side as requested
+	deadline := time.Now().Add(2 * time.Second)
+	for _, c := range conns {
+		_ = c.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "order completed"), deadline)
+		_ = c.Close()
+	}
+
+	// Optional: cleanup empty room to avoid leaks
+	rm.mu.Lock()
+	if len(rm.clients) == 0 {
+		// best-effort removal; ignore if not present
+		// actual client defers will remove from maps upon close
+	}
+	rm.mu.Unlock()
 }
