@@ -47,7 +47,7 @@ export function Content() {
 						<img
 							src="/supporterz-logo.png"
 							alt="サポーターズロゴ"
-							className="h-8 object-contain"
+							className="h-6 md:h-8 object-contain"
 						/>
 						<nav className="hidden md:flex gap-6">
 							<a href="/" className="text-sm hover:text-gray-900">
@@ -70,7 +70,7 @@ export function Content() {
 						<img
 							src="/event-header.png"
 							alt="技育祭 かき氷注文システムのUIを最凶にせよ"
-							className="w-full h-96 object-cover"
+							className="w-full h-48 sm:h-64 md:h-96 object-cover"
 						/>
 					</div>
 
