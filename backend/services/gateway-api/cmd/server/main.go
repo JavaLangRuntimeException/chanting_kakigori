@@ -33,21 +33,21 @@ func main() {
 
 	// Routing
 	e := echo.New()
-	e.GET("/v1/healthz", func(c echo.Context) error {
+	e.GET("/api/v1/healthz", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"status": "ok"})
 	})
-	e.GET("/swagger.yaml", func(c echo.Context) error {
+	e.GET("/api/v1/swagger.yaml", func(c echo.Context) error {
 		return c.File("/v1/swagger/gateway-api.yml")
 	})
-	e.GET("/v1/stores/menu", func(c echo.Context) error {
+	e.GET("/api/v1/stores/menu", func(c echo.Context) error {
 		menuHandler.GetMenu(c.Response().Writer, c.Request(), storeID)
 		return nil
 	})
-	e.POST("/v1/stores/orders", func(c echo.Context) error {
+	e.POST("/api/v1/stores/orders", func(c echo.Context) error {
 		orderHandler.PostOrders(c.Response().Writer, c.Request(), storeID)
 		return nil
 	})
-	e.GET("/v1/stores/orders/:order_id", func(c echo.Context) error {
+	e.GET("/api/v1/stores/orders/:order_id", func(c echo.Context) error {
 		orderHandler.GetOrderByID(c.Response().Writer, c.Request(), storeID, c.Param("order_id"))
 		return nil
 	})

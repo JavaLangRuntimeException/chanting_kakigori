@@ -41,6 +41,32 @@ func (h *OrderHandler) PostOrders(w http.ResponseWriter, r *http.Request, storeI
 	order, err := h.Usecase.PostOrder(ctx, storeID, body.MenuItemID)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
+		// Map upstream status codes when possible
+		if ue, ok := err.(*usecase.UpstreamError); ok {
+			switch ue.StatusCode {
+			case http.StatusBadRequest:
+				w.WriteHeader(http.StatusBadRequest)
+				_ = json.NewEncoder(w).Encode(map[string]string{
+					"error":   "Bad Request",
+					"message": ue.Body,
+				})
+				return
+			case http.StatusNotFound:
+				w.WriteHeader(http.StatusNotFound)
+				_ = json.NewEncoder(w).Encode(map[string]string{
+					"error":   "Not Found",
+					"message": ue.Body,
+				})
+				return
+			default:
+				w.WriteHeader(http.StatusBadGateway)
+				_ = json.NewEncoder(w).Encode(map[string]string{
+					"error":   "Bad Gateway",
+					"message": ue.Body,
+				})
+				return
+			}
+		}
 		w.WriteHeader(http.StatusBadGateway)
 		_ = json.NewEncoder(w).Encode(map[string]string{
 			"error":   "Bad Gateway",
@@ -65,6 +91,31 @@ func (h *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request, stor
 	order, err := h.Usecase.GetOrderByID(ctx, storeID, orderID)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
+		if ue, ok := err.(*usecase.UpstreamError); ok {
+			switch ue.StatusCode {
+			case http.StatusBadRequest:
+				w.WriteHeader(http.StatusBadRequest)
+				_ = json.NewEncoder(w).Encode(map[string]string{
+					"error":   "Bad Request",
+					"message": ue.Body,
+				})
+				return
+			case http.StatusNotFound:
+				w.WriteHeader(http.StatusNotFound)
+				_ = json.NewEncoder(w).Encode(map[string]string{
+					"error":   "Not Found",
+					"message": ue.Body,
+				})
+				return
+			default:
+				w.WriteHeader(http.StatusBadGateway)
+				_ = json.NewEncoder(w).Encode(map[string]string{
+					"error":   "Bad Gateway",
+					"message": ue.Body,
+				})
+				return
+			}
+		}
 		w.WriteHeader(http.StatusBadGateway)
 		_ = json.NewEncoder(w).Encode(map[string]string{
 			"error":   "Bad Gateway",
