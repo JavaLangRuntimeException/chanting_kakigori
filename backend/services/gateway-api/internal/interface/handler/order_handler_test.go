@@ -10,12 +10,11 @@ import (
 	"testing"
 
 	openapi "chantingkakigori/services/gateway-api/internal/swagger"
-	"chantingkakigori/services/gateway-api/internal/usecase"
 )
 
 type fakeOrderUsecase struct {
 	order   openapi.OrderResponse
-	getByID *usecase.GetOrderByIDResponse
+	getByID *openapi.OrderResponse
 	err     error
 }
 
@@ -23,7 +22,7 @@ func (f fakeOrderUsecase) PostOrder(_ context.Context, _ string, _ string) (*ope
 	return &f.order, f.err
 }
 
-func (f fakeOrderUsecase) GetOrderByID(_ context.Context, _ string, _ string) (*usecase.GetOrderByIDResponse, error) {
+func (f fakeOrderUsecase) GetOrderByID(_ context.Context, _ string, _ string) (*openapi.OrderResponse, error) {
 	return f.getByID, f.err
 }
 
@@ -113,7 +112,7 @@ func TestOrderHandler_PostOrders_UpstreamError(t *testing.T) {
 
 func TestOrderHandler_GetOrderByID_Success(t *testing.T) {
 	id := "o-1"
-	h := NewOrderHandler(fakeOrderUsecase{getByID: &usecase.GetOrderByIDResponse{Id: &id}})
+	h := NewOrderHandler(fakeOrderUsecase{getByID: &openapi.OrderResponse{Id: &id}})
 
 	req := httptest.NewRequest(http.MethodGet, "/v1/stores/HKWZRTNL/orders/o-1", nil)
 	rec := httptest.NewRecorder()
@@ -126,7 +125,7 @@ func TestOrderHandler_GetOrderByID_Success(t *testing.T) {
 		t.Fatalf("expected application/json, got %s", ct)
 	}
 
-	var resp usecase.GetOrderByIDResponse
+	var resp openapi.OrderResponse
 	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
 		t.Fatalf("decode: %v", err)
 	}

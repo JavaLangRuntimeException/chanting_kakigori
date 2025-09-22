@@ -20,13 +20,6 @@ type OrderClient struct {
 	Client  httpclient.HTTPClient
 }
 
-type GetOrderByIDResponse struct {
-	Id          *string `json:"id,omitempty"`
-	MenuItemId  *string `json:"menu_item_id,omitempty"`
-	MenuName    *string `json:"menu_name,omitempty"`
-	OrderNumber *int    `json:"order_number,omitempty"`
-}
-
 // NewMenuUsecase creates a new MenuUsecase with sane defaults.
 func NewOrderUsecase(baseURL string) *OrderClient {
 	return &OrderClient{
@@ -39,7 +32,7 @@ func NewOrderUsecase(baseURL string) *OrderClient {
 
 type OrderUsecase interface {
 	PostOrder(ctx context.Context, storeID string, menuItemID string) (*openapi.OrderResponse, error)
-	GetOrderByID(ctx context.Context, storeID string, orderID string) (*GetOrderByIDResponse, error)
+	GetOrderByID(ctx context.Context, storeID string, orderID string) (*openapi.OrderResponse, error)
 }
 
 // UpstreamError represents a non-2xx response from the upstream API.
@@ -142,7 +135,7 @@ func (u *OrderClient) PostOrder(ctx context.Context, storeID string, menuItemID 
 	return nil, fmt.Errorf("empty or unrecognized upstream response")
 }
 
-func (u *OrderClient) GetOrderByID(ctx context.Context, storeID string, orderID string) (*GetOrderByIDResponse, error) {
+func (u *OrderClient) GetOrderByID(ctx context.Context, storeID string, orderID string) (*openapi.OrderResponse, error) {
 	base, err := url.Parse(u.BaseURL)
 	if err != nil {
 		return nil, fmt.Errorf("invalid base url: %w", err)
@@ -173,13 +166,13 @@ func (u *OrderClient) GetOrderByID(ctx context.Context, storeID string, orderID 
 	}
 
 	var wrapped struct {
-		Order *GetOrderByIDResponse `json:"order"`
+		Order *openapi.OrderResponse `json:"order"`
 	}
 	if err := json.Unmarshal(raw, &wrapped); err == nil && wrapped.Order != nil && wrapped.Order.Id != nil && *wrapped.Order.Id != "" {
 		return wrapped.Order, nil
 	}
 
-	var single GetOrderByIDResponse
+	var single openapi.OrderResponse
 	if err := json.Unmarshal(raw, &single); err == nil && single.Id != nil && *single.Id != "" {
 		return &single, nil
 	}
