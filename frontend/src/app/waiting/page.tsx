@@ -204,6 +204,7 @@ export default function WaitingRoomPage() {
 						<h1 className="text-2xl font-bold text-gray-900 mb-2">
 							他の注文者を待機中
 						</h1>
+						<p className="text-gray-600">みんなで技育祭を盛り上げよう！</p>
 					</div>
 
 					<div className="bg-gray-50 rounded-lg p-4 mb-6">
