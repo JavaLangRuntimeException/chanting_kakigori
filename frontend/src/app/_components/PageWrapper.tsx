@@ -5,20 +5,15 @@ import { Content } from "./Content";
 import { SplashScreen } from "./SplashScreen";
 
 export function PageWrapper() {
-	const [showContent, setShowContent] = useState(false);
+	const [showSplash, setShowSplash] = useState(true);
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
-			setShowContent(true);
-		}, 2100);
+			setShowSplash(false);
+		}, 2000);
 
 		return () => clearTimeout(timer);
 	}, []);
 
-	return (
-		<>
-			<SplashScreen />
-			{showContent && <Content />}
-		</>
-	);
+	return <>{showSplash ? <SplashScreen /> : <Content />}</>;
 }
