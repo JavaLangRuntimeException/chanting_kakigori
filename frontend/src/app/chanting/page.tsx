@@ -29,7 +29,7 @@ export default function ChantingPage() {
 	const startTimeRef = useRef<number | null>(null);
 
 	const wsUrl = selectedMenu
-		? `ws://localhost:8080/ws?room=${selectedMenu.id}`
+		? `${process.env.NEXT_PUBLIC_API_URL?.replace("http://", "ws://").replace("https://", "wss://")}/ws?room=${selectedMenu.id}`
 		: "";
 
 	const { sendMessage } = useWebSocket({

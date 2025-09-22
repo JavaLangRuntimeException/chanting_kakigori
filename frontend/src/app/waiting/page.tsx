@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import {
 	currentStepAtom,
-	roomIdAtom,
 	selectedMenuAtom,
 	waitingRoomStateAtom,
 } from "@/store/atoms";
@@ -18,17 +17,15 @@ export default function WaitingRoomPage() {
 	const [, setCurrentStep] = useAtom(currentStepAtom);
 	const [selectedMenu] = useAtom(selectedMenuAtom);
 	const [waitingRoomState, setWaitingRoomState] = useAtom(waitingRoomStateAtom);
-	const [roomId] = useAtom(roomIdAtom);
 	const [countdown, setCountdown] = useState<number | null>(null);
 
 	const wsUrl = selectedMenu
-		? `ws://localhost:8080/ws/stay?room=${selectedMenu.id}`
+		? `${process.env.NEXT_PUBLIC_API_URL?.replace("http://", "ws://").replace("https://", "wss://")}/ws/stay?room=${selectedMenu.id}`
 		: "";
 
 	const { sendMessage } = useWebSocket({
 		url: wsUrl,
 		onMessage: (data) => {
-			console.log("Received WebSocket message:", data);
 			if (data.stay_num !== undefined) {
 				setWaitingRoomState((prev) => ({
 					...prev,
