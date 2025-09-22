@@ -16,11 +16,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### ユーザーフロー
 
 1. **メニュー表示**: トップページでかき氷メニューを表示
-2. **メニュー選択**: ユーザーがメニューを選択
 3. **注文ローディング**: 注文処理中の画面表示
-4. **エラー画面**: 「会場が冷え切っているため、かき氷は注文できませんでした」を表示
+4. **注文ローディング（エラー画面）**: 「会場が冷え切っているため、かき氷は注文できませんでした」をトーストとして表示
 5. **待機ルーム**:
-   - 「会場を盛り上げる仲間を待っています」メッセージ表示
+   - 「イベント会場を盛り上げる仲間を待っています」メッセージ表示
    - 同じメニューの待機人数をリアルタイム表示
    - WebSocket接続（`/ws/stay?room=<menu_id>`）
    - 3人集まると開始時刻を受信
@@ -44,7 +43,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 詠唱システム仕様
 
-- **詠唱内容**: バックエンドAPIから取得（実装予定）
+- **詠唱内容**: バックエンドAPIから取得
 - **判定基準**: 声量のみ（文字認識の正確性は評価しない）
 - **声量閾値**: 大きな声（具体値は調整可能）
 - **制限時間**: 未定（今後決定）
@@ -152,6 +151,7 @@ pnpx lefthook install
 - **Code Quality**: Biome（formatter & linter）
 - **API Client**: Aspida + Axios（OpenAPI連携）
 - **Package Manager**: pnpm
+- **State Management**: Jotai
 
 ### バックエンド
 - **Language**: Go
