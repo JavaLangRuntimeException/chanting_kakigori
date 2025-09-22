@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package gateway_api.v1;
+
+option go_package = "chantingkakigori/gen/go/gateway_api/v1;gatewayapiv1";
+
+service OrderService {
+  rpc PostOrder(PostOrderRequest) returns (PostOrderResponse) {}
+}
+
+message PostOrderRequest {
+  // menu_item_idはWSのroomから取得して渡す
+  string menu_item_id = 1;
+}
+
+message PostOrderResponse {
+  string id = 1;
+  string menu_item_id = 2;
+  string menu_name = 3;
+  string status = 4;
+  int32 order_number = 5;
+}
+
+

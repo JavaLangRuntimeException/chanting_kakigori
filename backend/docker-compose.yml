@@ -6,6 +6,7 @@ services:
     image: local/gateway-api:dev
     environment:
       - PORT=8080
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
   kakigori-ws:
     build:
       context: .
