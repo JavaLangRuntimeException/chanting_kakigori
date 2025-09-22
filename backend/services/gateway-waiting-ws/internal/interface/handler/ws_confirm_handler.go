@@ -20,6 +20,7 @@ type confirmRoom struct {
 	mu      sync.Mutex
 	ordered bool
 	ready   map[*websocket.Conn]struct{}
+	timer   *time.Timer
 }
 
 type wsConfirmHandler struct {
@@ -57,7 +58,17 @@ func (h *wsConfirmHandler) HandleWebSocketConfirm(w http.ResponseWriter, r *http
 	rm := h.getOrCreateRoom(room)
 
 	rm.mu.Lock()
+	wasEmpty := len(rm.clients) == 0
 	rm.clients[conn] = struct{}{}
+	// Start 3-minute timer when the first client joins the room
+	if wasEmpty {
+		if rm.timer != nil {
+			rm.timer.Stop()
+		}
+		rm.timer = time.AfterFunc(3*time.Minute, func() {
+			h.orderForRoom(room, rm)
+		})
+	}
 	rm.mu.Unlock()
 
 	defer func() {
@@ -68,6 +79,10 @@ func (h *wsConfirmHandler) HandleWebSocketConfirm(w http.ResponseWriter, r *http
 		shouldOrder := !rm.ordered && !empty && len(rm.ready) == len(rm.clients)
 		if empty {
 			// reset state when no one remains in the room
+			if rm.timer != nil {
+				rm.timer.Stop()
+				rm.timer = nil
+			}
 			rm.ordered = false
 			rm.ready = make(map[*websocket.Conn]struct{})
 		}
@@ -117,6 +132,10 @@ func (h *wsConfirmHandler) HandleWebSocketConfirm(w http.ResponseWriter, r *http
 
 func (h *wsConfirmHandler) orderForRoom(menuID string, rm *confirmRoom) {
 	rm.mu.Lock()
+	if rm.timer != nil {
+		rm.timer.Stop()
+		rm.timer = nil
+	}
 	if rm.ordered {
 		rm.mu.Unlock()
 		return
