@@ -74,6 +74,43 @@ paths:
                     error: Bad Request
                     message: "menu item not found: giiku-unknown"
 
+  /api/v1/chant:
+    post:
+      summary: Generate a chuunibyo chant line using Gemini
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                menu_item_id:
+                  type: string
+                  enum: [giiku-sai, giiku-haku, giiku-ten, giiku-camp]
+            example:
+              menu_item_id: giiku-sai
+      responses:
+        "200":
+          description: Generated chant
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chant:
+                    type: string
+              example:
+                chant: 漆黒の氷壁よ、技育祭の紋とストロベリーの朱を纏い、我が一閃にて甘美なる運命を凍結せよ——！
+        "400":
+          description: Invalid input or menu_item_id not allowed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Bad Request
+                message: "invalid menu_item_id: giiku-unknown"
+
   /api/v1/stores/orders/{orderId}:
     get:
       summary: Get order by ID
