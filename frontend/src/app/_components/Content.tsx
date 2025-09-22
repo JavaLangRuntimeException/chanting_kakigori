@@ -108,13 +108,12 @@ export function Content() {
 							</span>
 						</div>
 
-						<h2 className="text-3xl font-bold text-gray-900 mb-4">
-							技育祭企画！『YouTuber
-							ラムダ技術部』コラボハッカソン「かき氷注文システムのUIを最凶にせよ!?」
+						<h2 className="text-xl font-bold text-gray-900 mb-4 md:text-3xl">
+							技育祭企画！『YouTubeラムダ技術部』コラボハッカソン「かき氷注文システムのUIを最凶にせよ!?」
 						</h2>
 
 						<div className="grid md:grid-cols-2 gap-8 mb-8">
-							<div className="prose prose-gray max-w-none order-2 md:order-1">
+							<div className="order-2 md:order-1 overflow-hidden">
 								<p className="text-black leading-relaxed mb-4">
 									2025年10月11日（土）～12日（日）の2日間で開催する、エンジニアを目指す学生のための学園祭！技育祭2025【秋】
 									<br />
@@ -375,7 +374,7 @@ export function Content() {
 										</span>
 									</button>
 								</div>
-								<div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100">
+								<div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100 overflow-hidden">
 									{isLoading ? (
 										<div className="p-8 text-center">
 											<div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
@@ -387,7 +386,7 @@ export function Content() {
 										scheduleItems.map((item) => (
 											<div
 												key={item.id}
-												className="p-4 flex items-center justify-between gap-3"
+												className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3"
 											>
 												<div className="flex-1 min-w-0">
 													<p className="text-sm font-medium text-gray-900 truncate">
@@ -400,7 +399,7 @@ export function Content() {
 												<button
 													type="button"
 													onClick={() => handleMenuSelect(item)}
-													className="px-3 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-800 transition-colors flex-shrink-0 whitespace-nowrap"
+													className="px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-900 text-white text-xs sm:text-sm font-medium rounded hover:bg-gray-800 transition-colors flex-shrink-0 whitespace-nowrap"
 												>
 													申込へ
 												</button>

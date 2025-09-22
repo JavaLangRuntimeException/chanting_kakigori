@@ -202,11 +202,8 @@ export default function WaitingRoomPage() {
 					<div className="absolute inset-0 bg-gradient-to-br from-gray-50/10 to-transparent pointer-events-none" />
 					<div className="text-center mb-8 relative">
 						<h1 className="text-2xl font-bold text-gray-900 mb-2">
-							待機ルーム
+							他の注文者を待機中
 						</h1>
-						<p className="text-gray-600">
-							技育祭を盛り上げる仲間を待っています
-						</p>
 					</div>
 
 					<div className="bg-gray-50 rounded-lg p-4 mb-6">
@@ -228,23 +225,6 @@ export default function WaitingRoomPage() {
 									width: `${(waitingRoomState.currentUsers / REQUIRED_USERS) * 100}%`,
 								}}
 							/>
-						</div>
-						<div className="flex justify-between mt-2">
-							{[...Array(REQUIRED_USERS)].map((_, i) => (
-								<div
-									key={`user-${
-										// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-										i
-									}`}
-									className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
-										i < waitingRoomState.currentUsers
-											? "bg-gray-800 text-white scale-110"
-											: "bg-gray-200 text-gray-400"
-									}`}
-								>
-									{i + 1}
-								</div>
-							))}
 						</div>
 					</div>
 
