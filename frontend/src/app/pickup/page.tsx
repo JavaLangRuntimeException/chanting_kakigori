@@ -29,7 +29,7 @@ export default function PickupPage() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center px-4">
+		<div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center px-4">
 			<div className="max-w-md w-full">
 				<div className="bg-white rounded-lg shadow-lg p-8">
 					<div className="text-center mb-8">
@@ -40,27 +40,13 @@ export default function PickupPage() {
 						<p className="text-gray-600">かき氷の準備ができました</p>
 					</div>
 
-					<div className="bg-green-50 rounded-lg p-6 mb-6">
+					<div className="bg-gray-50 rounded-lg p-6 mb-6">
 						<p className="text-sm text-gray-600 mb-2">注文番号</p>
 						<p className="font-mono text-2xl font-bold text-gray-900 mb-4">
 							{orderState.orderId}
 						</p>
 						<p className="text-sm text-gray-600 mb-1">注文メニュー</p>
 						<p className="font-semibold text-gray-900">{selectedMenu.name}</p>
-					</div>
-
-					<div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-						<h2 className="font-semibold text-blue-900 mb-2">受取場所</h2>
-						<p className="text-blue-800">技育祭会場 かき氷ブース</p>
-						<p className="text-sm text-blue-600 mt-2">
-							注文番号をスタッフにお伝えください
-						</p>
-					</div>
-
-					<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-						<p className="text-yellow-800 text-sm">
-							⚠️ 受取後は速やかにお召し上がりください
-						</p>
 					</div>
 
 					<button

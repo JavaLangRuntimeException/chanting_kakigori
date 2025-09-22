@@ -21,10 +21,10 @@ export default function ChantingPage() {
 	const [selectedMenu] = useAtom(selectedMenuAtom);
 	const [chantingState, setChantingState] = useAtom(chantingStateAtom);
 	const [isButtonPressed, setIsButtonPressed] = useState(false);
-	const [volumeHistory, setVolumeHistory] = useState<number[]>([]);
 	const [timeRemaining, setTimeRemaining] = useState(CHANTING_DURATION / 1000);
 	const timerRef = useRef<NodeJS.Timeout | null>(null);
 	const startTimeRef = useRef<number | null>(null);
+	const volumeHistoryRef = useRef<number[]>([]);
 
 	const wsUrl = selectedMenu
 		? `${process.env.NEXT_PUBLIC_API_URL?.replace("http://", "ws://").replace("https://", "wss://")}/ws?room=${selectedMenu.id}`
@@ -55,12 +55,16 @@ export default function ChantingPage() {
 	const { volume, startDetecting, stopDetecting } = useVolumeDetector({
 		onVolumeChange: (vol) => {
 			if (isButtonPressed) {
+				volumeHistoryRef.current = [
+					...volumeHistoryRef.current.slice(-49),
+					vol,
+				];
 				setChantingState((prev) => ({
 					...prev,
 					volume: vol,
 					maxVolume: Math.max(prev.maxVolume, vol),
+					volumeHistory: volumeHistoryRef.current,
 				}));
-				setVolumeHistory((prev) => [...prev.slice(-49), vol]);
 				sendMessage({ value: vol });
 			}
 		},
@@ -72,10 +76,18 @@ export default function ChantingPage() {
 	}, [setCurrentStep]);
 
 	const handleChantingEnd = () => {
+		const currentVolumeHistory = volumeHistoryRef.current;
 		const avgVolume =
-			volumeHistory.length > 0
-				? volumeHistory.reduce((a, b) => a + b, 0) / volumeHistory.length
+			currentVolumeHistory.length > 0
+				? currentVolumeHistory.reduce((a, b) => a + b, 0) /
+					currentVolumeHistory.length
 				: 0;
+
+		setChantingState((prev) => ({
+			...prev,
+			calculatedAverageVolume: avgVolume,
+			volumeHistory: currentVolumeHistory,
+		}));
 
 		if (avgVolume >= VOLUME_THRESHOLD) {
 			setCurrentStep("chanting_complete");
@@ -86,7 +98,7 @@ export default function ChantingPage() {
 		}
 	};
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: handleChantingEndは意図的に依存配列から除外
 	useEffect(() => {
 		if (isButtonPressed && startTimeRef.current === null) {
 			startTimeRef.current = Date.now();
@@ -115,9 +127,14 @@ export default function ChantingPage() {
 
 	const handleButtonPress = () => {
 		setIsButtonPressed(true);
-		// 音声認識開始前にtranscriptをリセット
+		// 音声認識開始前にtranscriptとvolumeHistoryをリセット
 		resetTranscript();
-		setChantingState((prev) => ({ ...prev, transcript: "" }));
+		volumeHistoryRef.current = [];
+		setChantingState((prev) => ({
+			...prev,
+			transcript: "",
+			volumeHistory: [],
+		}));
 		startListening();
 		startDetecting();
 	};
@@ -135,12 +152,12 @@ export default function ChantingPage() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+		<div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center px-4">
 			<div className="max-w-md w-full">
 				<div className="bg-white rounded-lg shadow-lg p-8">
 					<div className="text-center mb-8">
-						<h1 className="text-3xl font-bold text-blue-900 mb-2">詠唱中</h1>
-						<p className="text-blue-700">大きな声で詠唱してください！</p>
+						<h1 className="text-3xl font-bold text-gray-900 mb-2">詠唱中</h1>
+						<p className="text-gray-700">大きな声で詠唱してください！</p>
 					</div>
 
 					{chantingState.chantText && (
@@ -157,8 +174,8 @@ export default function ChantingPage() {
 					<div className="mb-6">
 						<div className="flex items-center justify-between mb-2">
 							<span className="text-sm text-gray-600">現在の声量</span>
-							<span className="text-lg font-bold text-blue-600">
-								{Math.round(chantingState.volume * 100)}%
+							<span className="text-lg font-bold text-gray-900">
+								あなたの声量：{Math.round(chantingState.volume * 100)}%
 								<br />
 								みんなの声量：{Math.round(volume * 100)}%
 							</span>
@@ -167,8 +184,8 @@ export default function ChantingPage() {
 							<div
 								className={`h-6 rounded-full transition-all duration-100 ${
 									chantingState.volume >= VOLUME_THRESHOLD
-										? "bg-green-500"
-										: "bg-blue-500"
+										? "bg-gray-800"
+										: "bg-gray-600"
 								}`}
 								style={{ width: `${chantingState.volume * 100}%` }}
 							/>
@@ -181,9 +198,9 @@ export default function ChantingPage() {
 
 					{isButtonPressed && (
 						<div className="mb-6">
-							<div className="bg-blue-50 rounded-lg p-3">
+							<div className="bg-gray-50 rounded-lg p-3">
 								<p className="text-sm text-gray-600 mb-1">残り時間</p>
-								<p className="text-2xl font-bold text-blue-600">
+								<p className="text-2xl font-bold text-gray-900">
 									{timeRemaining}秒
 								</p>
 							</div>
@@ -217,8 +234,8 @@ export default function ChantingPage() {
 						onTouchEnd={handleButtonRelease}
 						className={`w-full py-6 rounded-lg font-bold text-xl transition-all ${
 							isButtonPressed
-								? "bg-blue-700 text-white scale-95"
-								: "bg-blue-600 text-white hover:bg-blue-700"
+								? "bg-gray-800 text-white scale-95"
+								: "bg-gray-700 text-white hover:bg-gray-800"
 						}`}
 					>
 						{isButtonPressed ? "詠唱中..." : "押して詠唱"}

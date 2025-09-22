@@ -13,9 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "かき氷チョイス",
-	description:
-		"かき氷のトッピングを選んで、自分だけのオリジナルかき氷を作ろう！",
+	title: "かき氷詠唱システム - 技育祭2025",
+	description: "君の詠唱で技育祭を盛り上げよう！",
 };
 
 export default function RootLayout({

@@ -19,6 +19,8 @@ export interface ChantingState {
 	maxVolume: number;
 	averageVolume: number;
 	chantText?: string; // 詠唱する文章
+	volumeHistory: number[]; // 音量履歴
+	calculatedAverageVolume?: number; // 計算された平均音量
 }
 
 export interface WaitingRoomState {
@@ -41,6 +43,7 @@ export const chantingStateAtom = atom<ChantingState>({
 	transcript: "",
 	maxVolume: 0,
 	averageVolume: 0,
+	volumeHistory: [],
 });
 
 export const waitingRoomStateAtom = atom<WaitingRoomState>({

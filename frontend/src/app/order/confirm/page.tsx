@@ -42,16 +42,16 @@ export default function OrderConfirmPage() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center px-4">
+		<div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center px-4">
 			<div className="max-w-md w-full">
 				<div className="bg-white rounded-lg shadow-lg p-8">
 					<div className="text-center mb-8">
 						<div className="text-6xl mb-4">🍧</div>
 						<h1 className="text-3xl font-bold text-gray-900 mb-2">注文確認</h1>
-						<p className="text-gray-600">3人全員の詠唱が完了しました！</p>
+						<p className="text-gray-600">全員の詠唱が完了しました！</p>
 					</div>
 
-					<div className="bg-blue-50 rounded-lg p-4 mb-6">
+					<div className="bg-gray-50 rounded-lg p-4 mb-6">
 						<p className="text-sm text-gray-600 mb-1">注文メニュー</p>
 						<p className="font-semibold text-gray-900">{selectedMenu.name}</p>
 					</div>
@@ -80,19 +80,13 @@ export default function OrderConfirmPage() {
 						</div>
 					</div>
 
-					<div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+					<div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
 						<div className="flex items-center justify-center gap-2">
-							<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
-							<p className="text-blue-800">注文状況を確認中...</p>
+							<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600" />
+							<p className="text-gray-800">注文状況を確認中...</p>
 						</div>
-						<p className="text-xs text-blue-600 text-center mt-2">
-							5秒ごとに自動更新されます
-						</p>
-					</div>
-
-					<div className="text-center">
-						<p className="text-sm text-gray-500">
-							まもなく受取案内画面に移動します
+						<p className="text-xs text-gray-600 text-center mt-2">
+							自動更新されます
 						</p>
 					</div>
 				</div>

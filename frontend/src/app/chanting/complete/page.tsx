@@ -26,7 +26,7 @@ export default function ChantingCompletePage() {
 	}, [router, setCurrentStep]);
 
 	return (
-		<div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center px-4">
+		<div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center px-4">
 			<div className="max-w-md w-full">
 				<div className="bg-white rounded-lg shadow-lg p-8">
 					<div className="text-center mb-8">
@@ -38,7 +38,7 @@ export default function ChantingCompletePage() {
 					</div>
 
 					{selectedMenu && (
-						<div className="bg-green-50 rounded-lg p-4 mb-6">
+						<div className="bg-gray-50 rounded-lg p-4 mb-6">
 							<p className="text-sm text-gray-600 mb-1">選択中のメニュー</p>
 							<p className="font-semibold text-gray-900">{selectedMenu.name}</p>
 						</div>
@@ -47,15 +47,27 @@ export default function ChantingCompletePage() {
 					<div className="space-y-4 mb-6">
 						<div className="bg-gray-50 rounded-lg p-4">
 							<p className="text-sm text-gray-600 mb-1">最大声量</p>
-							<p className="text-2xl font-bold text-green-600">
+							<p className="text-2xl font-bold text-gray-900">
 								{Math.round(chantingState.maxVolume * 100)}%
 							</p>
 						</div>
 
+						{chantingState.calculatedAverageVolume !== undefined &&
+							chantingState.calculatedAverageVolume > 0 && (
+								<div className="bg-gray-50 rounded-lg p-4">
+									<p className="text-sm text-gray-600 mb-1">
+										平均声量（あなたの詠唱）
+									</p>
+									<p className="text-2xl font-bold text-gray-900">
+										{Math.round(chantingState.calculatedAverageVolume * 100)}%
+									</p>
+								</div>
+							)}
+
 						{chantingState.averageVolume > 0 && (
 							<div className="bg-gray-50 rounded-lg p-4">
-								<p className="text-sm text-gray-600 mb-1">平均声量</p>
-								<p className="text-2xl font-bold text-green-600">
+								<p className="text-sm text-gray-600 mb-1">みんなの平均声量</p>
+								<p className="text-2xl font-bold text-gray-900">
 									{Math.round(chantingState.averageVolume * 100)}%
 								</p>
 							</div>
@@ -67,10 +79,32 @@ export default function ChantingCompletePage() {
 								<p className="text-gray-900">{chantingState.transcript}</p>
 							</div>
 						)}
+
+						{chantingState.volumeHistory &&
+							chantingState.volumeHistory.length > 0 && (
+								<div className="bg-gray-50 rounded-lg p-4">
+									<p className="text-sm text-gray-600 mb-2">音量グラフ</p>
+									<div className="flex items-end h-20 space-x-1">
+										{chantingState.volumeHistory.slice(-30).map((vol, idx) => (
+											<div
+												key={`vol-${
+													// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+													idx
+												}`}
+												className="flex-1 bg-gray-700 rounded-t"
+												style={{
+													height: `${Math.max(2, vol * 100)}%`,
+													opacity: 0.6 + (idx / 30) * 0.4,
+												}}
+											/>
+										))}
+									</div>
+								</div>
+							)}
 					</div>
 
-					<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-						<p className="text-blue-800 text-center">
+					<div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+						<p className="text-gray-800 text-center">
 							他の参加者の詠唱を待っています...
 						</p>
 					</div>

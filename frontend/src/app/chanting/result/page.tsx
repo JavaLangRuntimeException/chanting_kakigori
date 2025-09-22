@@ -24,7 +24,7 @@ export default function ChantingResultPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-b from-orange-50 to-white flex items-center justify-center px-4">
+		<div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center px-4">
 			<div className="max-w-md w-full">
 				<div className="bg-white rounded-lg shadow-lg p-8">
 					<div className="text-center mb-8">
@@ -33,7 +33,7 @@ export default function ChantingResultPage() {
 					</div>
 
 					{selectedMenu && (
-						<div className="bg-orange-50 rounded-lg p-4 mb-6">
+						<div className="bg-gray-50 rounded-lg p-4 mb-6">
 							<p className="text-sm text-gray-600 mb-1">選択中のメニュー</p>
 							<p className="font-semibold text-gray-900">{selectedMenu.name}</p>
 						</div>
@@ -58,7 +58,7 @@ export default function ChantingResultPage() {
 					<button
 						type="button"
 						onClick={handleRetry}
-						className="w-full py-3 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 transition-colors"
+						className="w-full py-3 bg-gray-700 text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors"
 					>
 						もう一度挑戦する
 					</button>
