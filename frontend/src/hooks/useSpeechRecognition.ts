@@ -49,6 +49,8 @@ export const useSpeechRecognition = ({
 		const SpeechRecognitionAPI =
 			window.SpeechRecognition || window.webkitSpeechRecognition;
 
+		console.log("SpeechRecognitionAPI:", SpeechRecognitionAPI);
+
 		if (!SpeechRecognitionAPI) {
 			setIsSupported(false);
 			return;
