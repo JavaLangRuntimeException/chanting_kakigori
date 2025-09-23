@@ -7,10 +7,10 @@ export function SplashScreen() {
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-red-50 to-white">
 			<div className="relative animate-fade-in bg-black rounded-full flex items-center justify-center w-72 h-72">
 				<Image
-					src="/giiku-logo.webp"
+					src="/giiku-logo.png"
 					alt="技育祭"
-					width={180}
-					height={180}
+					width={200}
+					height={200}
 					className="animate-scale-in"
 					priority
 				/>
