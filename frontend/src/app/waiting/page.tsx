@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/useExhaustiveDependencies: <explanation> */
 "use client";
 
 import { useAtom } from "jotai";
@@ -183,16 +184,16 @@ export default function WaitingRoomPage() {
 				clearTimeout(connectionTimeoutRef.current);
 			}
 		};
-	}, [selectedMenu, sendMessage, isConnected, waitingRoomState.startTime]);
+	}, [isConnected]);
 
 	useEffect(() => {
 		return () => {
-			if (connectionTimeoutRef.current) {
-				clearTimeout(connectionTimeoutRef.current);
-			}
+			if (!connectionTimeoutRef.current) return;
+
+			clearTimeout(connectionTimeoutRef.current);
 			disconnect();
 		};
-	}, [disconnect]);
+	}, []);
 
 	if (!selectedMenu) {
 		router.push("/");
