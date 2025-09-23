@@ -123,8 +123,12 @@ export default function WaitingRoomPage() {
 			setIsConnected(true);
 			setConnectionError(null);
 		},
-		onClose: () => {
-			console.log("Disconnected from waiting room WebSocket");
+		onClose: (event: CloseEvent) => {
+			console.log("Disconnected from waiting room WebSocket", {
+				code: event.code,
+				reason: event.reason,
+				wasClean: event.wasClean,
+			});
 			setIsConnected(false);
 			if (!waitingRoomState.startTime) {
 				setConnectionError("接続が切断されました。再接続中...");
