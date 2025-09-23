@@ -6,7 +6,8 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: "gce"
     kubernetes.io/ingress.global-static-ip-name: "chanting-kakigori-ip"
-    networking.gke.io/managed-certificates: "chanting-kakigori-ssl-cert"
+    networking.gke.io/managed-certificates: "chanting-kakigori-ssl-cert-new"
+    kubernetes.io/ingress.allow-http: "true"
 spec:
   rules:
     # カスタムドメインでのアクセス
@@ -34,7 +35,7 @@ spec:
 apiVersion: networking.gke.io/v1
 kind: ManagedCertificate
 metadata:
-  name: chanting-kakigori-ssl-cert
+  name: chanting-kakigori-ssl-cert-new
   namespace: chanting-kakigori
 spec:
   domains:
