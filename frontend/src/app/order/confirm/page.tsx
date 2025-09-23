@@ -87,8 +87,7 @@ export default function OrderConfirmPage() {
 	}, [orderState.orderId, router, setOrderState]);
 
 	const handleTweet = () => {
-		const tweetText = `
-#技育祭 でかき氷を注文しました！
+		const tweetText = `#技育祭 でかき氷を注文しました！
 		
 【詠唱】
 ${chantText}
