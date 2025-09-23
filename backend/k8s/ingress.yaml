@@ -1,0 +1,42 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: chanting-kakigori-ingress
+  namespace: chanting-kakigori
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "chanting-kakigori-ip"
+    networking.gke.io/managed-certificates: "chanting-kakigori-ssl-cert-new"
+    kubernetes.io/ingress.allow-http: "true"
+spec:
+  rules:
+    # カスタムドメインでのアクセス
+    - host: chanting-kakigori-backend.taramanji.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 80
+    # IPアドレス直接アクセス（Hostヘッダーなし）
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 80
+---
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: chanting-kakigori-ssl-cert-new
+  namespace: chanting-kakigori
+spec:
+  domains:
+    - chanting-kakigori-backend.taramanji.com

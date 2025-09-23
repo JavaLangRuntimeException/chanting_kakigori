@@ -1,0 +1,68 @@
+steps:
+  # Build and push Docker images
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-f",
+        "services/gateway-api/Dockerfile",
+        "-t",
+        "gcr.io/$PROJECT_ID/gateway-api:$COMMIT_SHA",
+        ".",
+      ]
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/gateway-api:$COMMIT_SHA"]
+
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-f",
+        "services/kakigori-ws/Dockerfile",
+        "-t",
+        "gcr.io/$PROJECT_ID/kakigori-ws:$COMMIT_SHA",
+        ".",
+      ]
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/kakigori-ws:$COMMIT_SHA"]
+
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-f",
+        "services/gateway-ws/Dockerfile",
+        "-t",
+        "gcr.io/$PROJECT_ID/gateway-ws:$COMMIT_SHA",
+        ".",
+      ]
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/gateway-ws:$COMMIT_SHA"]
+
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-f",
+        "services/gateway-waiting-ws/Dockerfile",
+        "-t",
+        "gcr.io/$PROJECT_ID/gateway-waiting-ws:$COMMIT_SHA",
+        ".",
+      ]
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/gateway-waiting-ws:$COMMIT_SHA"]
+
+  # Deploy to GKE
+  - name: "gcr.io/cloud-builders/gke-deploy"
+    args:
+      - run
+      - --filename=k8s/
+      - --image=gcr.io/$PROJECT_ID/gateway-api:$COMMIT_SHA
+      - --image=gcr.io/$PROJECT_ID/kakigori-ws:$COMMIT_SHA
+      - --image=gcr.io/$PROJECT_ID/gateway-ws:$COMMIT_SHA
+      - --image=gcr.io/$PROJECT_ID/gateway-waiting-ws:$COMMIT_SHA
+      - --location=us-central1
+      - --cluster=chanting-kakigori
+
+options:
+  logging: CLOUD_LOGGING_ONLY

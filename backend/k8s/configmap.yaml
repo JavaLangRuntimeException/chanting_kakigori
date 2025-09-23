@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: nginx-config
+    namespace: chanting-kakigori
+data:
+    nginx.conf: |
+        worker_processes  1;
+
+        events { worker_connections 1024; }
+
+        http {
+            include       mime.types;
+            default_type  application/octet-stream;
+            sendfile        on;
+            keepalive_timeout  65;
+
+            upstream gateway_ws {
+                server gateway-ws-service:8080;
+            }
+
+            upstream gateway_api {
+                server gateway-api-service:8080;
+            }
+
+            upstream gateway_waiting_ws {
+                server gateway-waiting-ws-service:8080;
+            }
+
+            server {
+                listen 80;
+
+                # WebSocket path
+                location /ws {
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Connection "upgrade";
+                    proxy_set_header Host $host;
+                    proxy_read_timeout 3600s;
+                    proxy_send_timeout 3600s;
+                    proxy_pass http://gateway_ws;
+                }
+
+                # Waiting WS path
+                location /ws/stay {
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Connection "upgrade";
+                    proxy_set_header Host $host;
+                    proxy_read_timeout 3600s;
+                    proxy_send_timeout 3600s;
+                    proxy_pass http://gateway_waiting_ws;
+                }
+
+                # Confirm WS path
+                location /ws/confirm {
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Connection "upgrade";
+                    proxy_set_header Host $host;
+                    proxy_read_timeout 3600s;
+                    proxy_send_timeout 3600s;
+                    proxy_pass http://gateway_waiting_ws;
+                }
+
+                # REST API path
+                location /api {
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto $scheme;
+                    proxy_pass http://gateway_api;
+                }
+
+                # Healthz of edge itself
+                location = /healthz {
+                    default_type application/json;
+                    return 200 '{"status":"ok"}';
+                }
+
+                # Root path for health checks
+                location = / {
+                    default_type application/json;
+                    return 200 '{"status":"ok","service":"chanting-kakigori"}';
+                }
+            }
+        }

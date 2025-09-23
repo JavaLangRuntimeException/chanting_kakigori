@@ -51,6 +51,27 @@ func (h *wsConfirmHandler) HandleWebSocketConfirm(w http.ResponseWriter, r *http
 		return
 	}
 	conn, err := upgrader.Upgrade(w, r, nil)
+	// Heartbeat setup (ping/pong)
+	const pongWait = 60 * time.Second
+	const pingPeriod = 30 * time.Second
+	_ = conn.SetReadDeadline(time.Now().Add(pongWait))
+	conn.SetPongHandler(func(string) error {
+		return conn.SetReadDeadline(time.Now().Add(pongWait))
+	})
+	stopCh := make(chan struct{})
+	go func() {
+		ticker := time.NewTicker(pingPeriod)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				_ = conn.WriteControl(websocket.PingMessage, nil, time.Now().Add(5*time.Second))
+			case <-stopCh:
+				return
+			}
+		}
+	}()
+
 	if err != nil {
 		log.Printf("confirm ws upgrade error: %v", err)
 		return
@@ -97,6 +118,7 @@ func (h *wsConfirmHandler) HandleWebSocketConfirm(w http.ResponseWriter, r *http
 			delete(h.rooms, room)
 			h.mu.Unlock()
 		}
+		close(stopCh)
 	}()
 
 	// Keep connection open (noop read loop)

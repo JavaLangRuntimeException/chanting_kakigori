@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-waiting-ws
+  namespace: chanting-kakigori
+  labels:
+    app: gateway-waiting-ws
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway-waiting-ws
+  template:
+    metadata:
+      labels:
+        app: gateway-waiting-ws
+    spec:
+      containers:
+        - name: gateway-waiting-ws
+          image: us-central1-docker.pkg.dev/chanting-472914/chanting-kakigori-repo/gateway-waiting-ws:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            - name: GATEWAY_API_GRPC_ADDR
+              value: "gateway-api-service:9090"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-waiting-ws-service
+  namespace: chanting-kakigori
+spec:
+  selector:
+    app: gateway-waiting-ws
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP
