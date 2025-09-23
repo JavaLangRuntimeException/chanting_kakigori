@@ -110,6 +110,25 @@ export const useWebSocket = ({
 			ws.onerror = (event) => {
 				isConnectingRef.current = false;
 				onErrorRef.current?.(event);
+
+				// エラー時も再接続を試みる
+				if (
+					autoReconnect &&
+					reconnectAttemptsRef.current < maxReconnectAttemptsRef.current
+				) {
+					reconnectAttemptsRef.current++;
+					const delay = Math.min(
+						reconnectDelay * 1.5 ** reconnectAttemptsRef.current,
+						30000,
+					);
+					console.log(
+						`WebSocket error occurred, reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current})`,
+					);
+
+					reconnectTimeoutRef.current = setTimeout(() => {
+						connect();
+					}, delay);
+				}
 			};
 
 			wsRef.current = ws;

@@ -80,9 +80,12 @@ export const useSpeechRecognition = ({
 		};
 
 		recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-			console.error("Speech recognition error:", event.error);
+			// abortedエラーは通常の停止処理なので、エラーログを出さない
+			if (event.error !== "aborted") {
+				console.error("Speech recognition error:", event.error);
+				onError?.(event);
+			}
 			setIsListening(false);
-			onError?.(event);
 		};
 
 		recognition.onend = () => {
@@ -105,12 +108,21 @@ export const useSpeechRecognition = ({
 		}
 
 		try {
+			// 既にリスニング中の場合は何もしない
+			if (isListening) {
+				return;
+			}
 			recognitionRef.current.start();
 			setIsListening(true);
 		} catch (error) {
-			console.error("Failed to start speech recognition:", error);
+			// 既に開始されている場合のエラーを無視
+			if (error instanceof DOMException && error.name === "InvalidStateError") {
+				console.log("Speech recognition is already started");
+			} else {
+				console.error("Failed to start speech recognition:", error);
+			}
 		}
-	}, [isSupported]);
+	}, [isSupported, isListening]);
 
 	const stopListening = useCallback(() => {
 		if (!recognitionRef.current) {
@@ -118,12 +130,21 @@ export const useSpeechRecognition = ({
 		}
 
 		try {
+			// 既に停止している場合は何もしない
+			if (!isListening) {
+				return;
+			}
 			recognitionRef.current.stop();
 			setIsListening(false);
 		} catch (error) {
-			console.error("Failed to stop speech recognition:", error);
+			// 既に停止されている場合のエラーを無視
+			if (error instanceof DOMException && error.name === "InvalidStateError") {
+				console.log("Speech recognition is already stopped");
+			} else {
+				console.error("Failed to stop speech recognition:", error);
+			}
 		}
-	}, []);
+	}, [isListening]);
 
 	const resetTranscript = useCallback(() => {
 		setTranscript("");

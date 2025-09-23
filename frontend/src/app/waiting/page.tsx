@@ -137,7 +137,9 @@ export default function WaitingRoomPage() {
 		},
 		onError: (error) => {
 			console.error("WebSocket error:", error);
-			setConnectionError("接続エラーが発生しました。再接続中...");
+			setConnectionError(
+				"接続エラーが発生しました。自動的に再接続を試みます...",
+			);
 		},
 	});
 
