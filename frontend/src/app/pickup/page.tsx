@@ -33,9 +33,8 @@ export default function PickupPage() {
 			<div className="max-w-md w-full">
 				<div className="bg-white rounded-lg shadow-lg p-8">
 					<div className="text-center mb-8">
-						<div className="text-6xl mb-4 animate-pulse">✨</div>
 						<h1 className="text-3xl font-bold text-gray-900 mb-2">
-							受取準備完了！
+							受取準備完了
 						</h1>
 						<p className="text-gray-600">かき氷の準備ができました</p>
 					</div>

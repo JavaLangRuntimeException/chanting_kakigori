@@ -42,18 +42,17 @@ export default function OrderConfirmPage() {
 
 	const handleTweet = () => {
 		const tweetText = `
-		#技育祭 でかき氷を注文しました！
+#技育祭 でかき氷を注文しました！
 		
-		【詠唱】
-		${chantText}
-
-		【注文】
-		${selectedMenu?.name}
+【詠唱】
+${chantText}
+【注文】
+${selectedMenu?.name}
 
 ▼参加はこちらから
 https://geek.supporterz.jp/geeksai/2025autumn
 
-##詠唱注文システム`;
+#詠唱注文システム`;
 		const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
 			tweetText,
 		)}`;
