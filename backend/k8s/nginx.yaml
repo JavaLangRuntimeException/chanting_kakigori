@@ -6,7 +6,7 @@ metadata:
   labels:
     app: nginx
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: nginx
@@ -41,6 +41,8 @@ kind: Service
 metadata:
   name: nginx-service
   namespace: chanting-kakigori
+  annotations:
+    cloud.google.com/backend-config: '{"default": "nginx-backendconfig"}'
 spec:
   selector:
     app: nginx

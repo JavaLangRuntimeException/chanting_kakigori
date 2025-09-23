@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 
 	kakigoriwsv1 "chantingkakigori/gen/go/kakigori_ws/v1"
 	openapi "chantingkakigori/services/gateway-ws/internal"
@@ -23,7 +24,8 @@ type wsOut struct {
 }
 
 type client struct {
-	conn *websocket.Conn
+	conn    *websocket.Conn
+	writeMu sync.Mutex
 }
 
 type room struct {
@@ -72,6 +74,28 @@ func (h *wsHandler) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 	rm := h.getOrCreateRoom(params.Room)
 	cl := &client{conn: conn}
+	// Heartbeat setup (ping/pong)
+	const pongWait = 60 * time.Second
+	const pingPeriod = 30 * time.Second
+	_ = conn.SetReadDeadline(time.Now().Add(pongWait))
+	conn.SetPongHandler(func(string) error {
+		return conn.SetReadDeadline(time.Now().Add(pongWait))
+	})
+	stopCh := make(chan struct{})
+	go func() {
+		ticker := time.NewTicker(pingPeriod)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				cl.writeMu.Lock()
+				_ = cl.conn.WriteControl(websocket.PingMessage, nil, time.Now().Add(5*time.Second))
+				cl.writeMu.Unlock()
+			case <-stopCh:
+				return
+			}
+		}
+	}()
 
 	rm.mu.Lock()
 	rm.clients[cl] = struct{}{}
@@ -125,7 +149,10 @@ func (h *wsHandler) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 			}
 			rm.mu.Unlock()
 			for _, c := range clients {
-				if err := c.conn.WriteMessage(websocket.TextMessage, payload); err != nil {
+				c.writeMu.Lock()
+				err := c.conn.WriteMessage(websocket.TextMessage, payload)
+				c.writeMu.Unlock()
+				if err != nil {
 					log.Printf("ws write error: room=%s err=%v", params.Room, err)
 				}
 			}
@@ -158,4 +185,5 @@ func (h *wsHandler) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	// Close stream and wait receiver to end
 	_ = stream.CloseSend()
 	<-done
+	close(stopCh)
 }

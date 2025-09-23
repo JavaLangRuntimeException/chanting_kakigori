@@ -16,7 +16,8 @@ type stayPayload struct {
 }
 
 type stayClient struct {
-	conn *websocket.Conn
+	conn    *websocket.Conn
+	writeMu sync.Mutex
 }
 
 type stayRoom struct {
@@ -57,7 +58,10 @@ func (h *wsStayHandler) broadcast(rm *stayRoom, payload stayPayload) {
 	}
 	rm.mu.Unlock()
 	for _, c := range clients {
-		if err := c.conn.WriteMessage(websocket.TextMessage, data); err != nil {
+		c.writeMu.Lock()
+		err := c.conn.WriteMessage(websocket.TextMessage, data)
+		c.writeMu.Unlock()
+		if err != nil {
 			log.Printf("stay ws write error: room=%s err=%v", rm.id, err)
 		}
 	}
@@ -103,6 +107,29 @@ func (h *wsStayHandler) HandleWebSocketStay(w http.ResponseWriter, r *http.Reque
 		}
 	}()
 
+	// Heartbeat setup (ping/pong)
+	const pongWait = 60 * time.Second
+	const pingPeriod = 30 * time.Second
+	_ = conn.SetReadDeadline(time.Now().Add(pongWait))
+	conn.SetPongHandler(func(string) error {
+		return conn.SetReadDeadline(time.Now().Add(pongWait))
+	})
+	stopCh := make(chan struct{})
+	go func() {
+		ticker := time.NewTicker(pingPeriod)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				cl.writeMu.Lock()
+				_ = cl.conn.WriteControl(websocket.PingMessage, nil, time.Now().Add(5*time.Second))
+				cl.writeMu.Unlock()
+			case <-stopCh:
+				return
+			}
+		}
+	}()
+
 	// Immediately broadcast current state per spec
 	switch count {
 	case 1:
@@ -126,7 +153,9 @@ func (h *wsStayHandler) HandleWebSocketStay(w http.ResponseWriter, r *http.Reque
 		}
 		rm.mu.Unlock()
 		for _, c := range clients {
+			c.writeMu.Lock()
 			_ = c.conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "session ended"), time.Now().Add(2*time.Second))
+			c.writeMu.Unlock()
 			_ = c.conn.Close()
 		}
 	default:
@@ -141,4 +170,5 @@ func (h *wsStayHandler) HandleWebSocketStay(w http.ResponseWriter, r *http.Reque
 			break
 		}
 	}
+	close(stopCh)
 }
