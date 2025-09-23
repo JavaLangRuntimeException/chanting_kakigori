@@ -300,7 +300,7 @@ export default function WaitingRoomPage() {
 							<p className="text-sm text-gray-500">
 								{waitingRoomState.currentUsers < REQUIRED_USERS
 									? `あと${REQUIRED_USERS - waitingRoomState.currentUsers}人で詠唱開始`
-									: "間もなく詠唱が始まります"}
+									: ""}
 							</p>
 						)}
 					</div>

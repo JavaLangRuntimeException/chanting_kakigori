@@ -138,12 +138,10 @@ export default function ChantingPage() {
 
 	const handleButtonPress = () => {
 		setIsButtonPressed(true);
-		// 音声認識開始前にtranscriptとvolumeHistoryをリセット
-		resetTranscript();
+		// 音声認識開始前にvolumeHistoryをリセット（transcriptはリセットしない）
 		volumeHistoryRef.current = [];
 		setChantingState((prev) => ({
 			...prev,
-			transcript: "",
 			volumeHistory: [],
 		}));
 		startListening();
