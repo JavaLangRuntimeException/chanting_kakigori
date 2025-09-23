@@ -5,6 +5,7 @@ import { Twitter } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { apiClient } from "@/lib/apiClient";
 import {
 	chantingStateAtom,
 	currentStepAtom,
@@ -24,21 +25,66 @@ export default function OrderConfirmPage() {
 
 	useEffect(() => {
 		setCurrentStep("order_confirm");
-		setOrderState({ orderId: `ORDER-${Date.now()}`, status: "preparing" });
-	}, [setCurrentStep, setOrderState]);
+
+		const createOrder = async () => {
+			if (!selectedMenu?.id) return;
+
+			try {
+				const response = await apiClient.api.v1.stores.orders.$post({
+					body: { menu_item_id: selectedMenu.id },
+				});
+
+				if (response) {
+					setOrderState({
+						orderId: response.id,
+						status: response.status || "pending",
+						orderNumber: response.order_number,
+					});
+				}
+			} catch (error) {
+				console.error("注文作成エラー:", error);
+				setOrderState({ orderId: `ORDER-${Date.now()}`, status: "preparing" });
+			}
+		};
+
+		createOrder();
+	}, [setCurrentStep, setOrderState, selectedMenu]);
 
 	useEffect(() => {
+		if (!orderState.orderId) return;
+
+		const checkOrderStatus = async () => {
+			try {
+				const response = await apiClient.api.v1.stores.orders
+					._orderId(orderState.orderId!)
+					.$get();
+
+				if (response) {
+					setOrderState((prev) => ({
+						...prev,
+						status: response.status || "pending",
+						orderNumber: response.order_number,
+					}));
+
+					if (
+						response.status === "waitingPickup" ||
+						response.status === "completed"
+					) {
+						router.push("/pickup");
+					}
+				}
+			} catch (error) {
+				console.error("注文ステータス取得エラー:", error);
+			}
+		};
+
 		const interval = setInterval(() => {
 			setPollingCount((prev) => prev + 1);
-
-			if (pollingCount >= 3) {
-				setOrderState((prev) => ({ ...prev, status: "ready" }));
-				router.push("/pickup");
-			}
+			checkOrderStatus();
 		}, POLLING_INTERVAL);
 
 		return () => clearInterval(interval);
-	}, [pollingCount, router, setOrderState]);
+	}, [orderState.orderId, router, setOrderState]);
 
 	const handleTweet = () => {
 		const tweetText = `

@@ -31,6 +31,7 @@ export interface WaitingRoomState {
 export interface OrderState {
 	orderId?: string;
 	status?: string;
+	orderNumber?: number;
 }
 
 export const currentStepAtom = atom<AppStep>("menu");

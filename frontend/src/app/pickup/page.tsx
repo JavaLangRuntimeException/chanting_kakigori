@@ -3,6 +3,7 @@
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { apiClient } from "@/lib/apiClient";
 import {
 	currentStepAtom,
 	orderStateAtom,
@@ -12,12 +13,29 @@ import {
 export default function PickupPage() {
 	const router = useRouter();
 	const [, setCurrentStep] = useAtom(currentStepAtom);
-	const [orderState] = useAtom(orderStateAtom);
+	const [orderState, setOrderState] = useAtom(orderStateAtom);
 	const [selectedMenu] = useAtom(selectedMenuAtom);
 
 	useEffect(() => {
 		setCurrentStep("pickup");
-	}, [setCurrentStep]);
+
+		const fetchOrderDetails = async () => {
+			if (!orderState.orderId) return;
+
+			const response = await apiClient.api.v1.stores.orders
+				._orderId(orderState.orderId)
+				.$get();
+			if (!response) return;
+
+			setOrderState((prev) => ({
+				...prev,
+				status: response.status || "completed",
+				orderNumber: response.order_number,
+			}));
+		};
+
+		fetchOrderDetails();
+	}, [setCurrentStep, orderState.orderId, setOrderState]);
 
 	const handleBackToMenu = () => {
 		router.push("/");
@@ -40,10 +58,22 @@ export default function PickupPage() {
 					</div>
 
 					<div className="bg-gray-50 rounded-lg p-6 mb-6">
-						<p className="text-sm text-gray-600 mb-2">注文番号</p>
-						<p className="font-mono text-2xl font-bold text-gray-900 mb-4">
-							{orderState.orderId}
-						</p>
+						{orderState.orderNumber && (
+							<>
+								<p className="text-sm text-gray-600 mb-2">受取番号</p>
+								<p className="font-mono text-3xl font-bold text-gray-900 mb-4">
+									{orderState.orderNumber}
+								</p>
+							</>
+						)}
+						{orderState.orderId && (
+							<>
+								<p className="text-sm text-gray-600 mb-2">注文ID</p>
+								<p className="font-mono text-lg text-gray-600 mb-4">
+									{orderState.orderId}
+								</p>
+							</>
+						)}
 						<p className="text-sm text-gray-600 mb-1">注文メニュー</p>
 						<p className="font-semibold text-gray-900">{selectedMenu.name}</p>
 					</div>
