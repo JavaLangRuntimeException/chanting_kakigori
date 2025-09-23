@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/useExhaustiveDependencies: <explanation> */
 "use client";
 
 import { useAtom } from "jotai";
@@ -136,7 +137,9 @@ export default function WaitingRoomPage() {
 		},
 		onError: (error) => {
 			console.error("WebSocket error:", error);
-			setConnectionError("接続エラーが発生しました。再接続中...");
+			setConnectionError(
+				"接続エラーが発生しました。自動的に再接続を試みます...",
+			);
 		},
 	});
 
@@ -183,16 +186,16 @@ export default function WaitingRoomPage() {
 				clearTimeout(connectionTimeoutRef.current);
 			}
 		};
-	}, [selectedMenu, sendMessage, isConnected, waitingRoomState.startTime]);
+	}, [isConnected]);
 
 	useEffect(() => {
 		return () => {
-			if (connectionTimeoutRef.current) {
-				clearTimeout(connectionTimeoutRef.current);
-			}
+			if (!connectionTimeoutRef.current) return;
+
+			clearTimeout(connectionTimeoutRef.current);
 			disconnect();
 		};
-	}, [disconnect]);
+	}, []);
 
 	if (!selectedMenu) {
 		router.push("/");
