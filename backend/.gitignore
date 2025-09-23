@@ -62,3 +62,6 @@ docker-compose.override.yml
 # Node (future tooling)
 # ==============================
 node_modules/
+
+
+k8s/secret.yaml
