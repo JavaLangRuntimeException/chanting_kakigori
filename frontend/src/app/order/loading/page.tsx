@@ -44,7 +44,8 @@ export default function OrderLoadingPage() {
 					}
 				}
 				i++;
-			}, 100); // typing speed
+				// }, 100); // typing speed
+			}, 10000000); // typing speed
 
 			return () => clearInterval(typingInterval);
 		}
